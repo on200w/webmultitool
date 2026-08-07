@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tekst-/ord-teller</title>
+  <style>
+    :root {
+      --brand-green: #009d4f;
+      --brand-deep-green: #005850;
+      --brand-light: #cfd2d3;
+      --surface: rgba(255, 255, 255, 0.94);
+      --text: #12332f;
+      --muted: #385552;
+      --border: #afbbbb;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Segoe UI", Calibri, sans-serif;
+      color: var(--text);
+      background: linear-gradient(140deg, #edf6f1, #cfd2d3);
+      padding: 20px;
+    }
+    .wrap { width: min(1200px, 100%); margin: 0 auto; }
+    h1 { margin: 0 0 12px; }
+    .layout { display: grid; grid-template-columns: 1fr 320px; gap: 16px; }
+    .panel, .stats {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px;
+    }
+    .panel { display: grid; gap: 10px; align-content: start; }
+    label { display: block; font-weight: 600; margin-bottom: 4px; }
+    textarea, button {
+      width: 100%;
+      font: inherit;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 9px 10px;
+      background: #fff;
+      color: var(--text);
+    }
+    textarea { min-height: 380px; resize: vertical; line-height: 1.5; }
+    .btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    button { cursor: pointer; font-weight: 700; }
+    #copyBtn { background: var(--brand-green); color: #fff; border-color: transparent; }
+    #clearBtn { background: var(--brand-deep-green); color: #fff; border-color: transparent; }
+    .stats h2 { font-size: 1.1rem; margin: 0 0 10px; }
+    .stat-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid #e2e8e7;
+      font-size: 0.95rem;
+    }
+    .stat-row:last-child { border-bottom: none; }
+    .stat-row span:last-child { font-weight: 700; color: var(--brand-deep-green); }
+    .back { display: inline-block; margin-top: 10px; color: var(--brand-deep-green); font-weight: 700; text-decoration: none; }
+    .back:hover { text-decoration: underline; }
+    @media (max-width: 950px) { .layout { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <h1>Tekst-/ord-teller</h1>
+    <div class="layout">
+      <section class="panel">
+        <div>
+          <label for="textInput">Lim inn eller skriv tekst</label>
+          <textarea id="textInput" placeholder="Skriv eller lim inn tekst her..."></textarea>
+        </div>
+        <div class="btns">
+          <button id="copyBtn" type="button">Kopier statistikk</button>
+          <button id="clearBtn" type="button">Tøm tekst</button>
+        </div>
+        <a class="back" href="../../index.html">Tilbake til hovedmeny</a>
+      </section>
+
+      <section class="stats">
+        <h2>Statistikk</h2>
+        <div class="stat-row"><span>Tegn (med mellomrom)</span><span id="charsWithSpaces">0</span></div>
+        <div class="stat-row"><span>Tegn (uten mellomrom)</span><span id="charsNoSpaces">0</span></div>
+        <div class="stat-row"><span>Ord</span><span id="wordCount">0</span></div>
+        <div class="stat-row"><span>Setninger</span><span id="sentenceCount">0</span></div>
+        <div class="stat-row"><span>Avsnitt</span><span id="paragraphCount">0</span></div>
+        <div class="stat-row"><span>Snitt ordlengde</span><span id="avgWordLength">0</span></div>
+        <div class="stat-row"><span>Estimert lesetid</span><span id="readingTime">0 min</span></div>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    const textInput = document.getElementById("textInput");
+    const copyBtn = document.getElementById("copyBtn");
+    const clearBtn = document.getElementById("clearBtn");
+
+    const charsWithSpacesEl = document.getElementById("charsWithSpaces");
+    const charsNoSpacesEl = document.getElementById("charsNoSpaces");
+    const wordCountEl = document.getElementById("wordCount");
+    const sentenceCountEl = document.getElementById("sentenceCount");
+    const paragraphCountEl = document.getElementById("paragraphCount");
+    const avgWordLengthEl = document.getElementById("avgWordLength");
+    const readingTimeEl = document.getElementById("readingTime");
+
+    const WORDS_PER_MINUTE = 200;
+
+    function updateStats() {
+      const text = textInput.value;
+      const trimmed = text.trim();
+
+      const charsWithSpaces = text.length;
+      const charsNoSpaces = text.replace(/\s/g, "").length;
+
+      const words = trimmed.length ? trimmed.split(/\s+/) : [];
+      const wordCount = words.length;
+
+      const sentences = trimmed.length ? trimmed.split(/[.!?]+/).filter((s) => s.trim().length > 0) : [];
+      const sentenceCount = sentences.length;
+
+      const paragraphs = trimmed.length ? trimmed.split(/\n+/).filter((p) => p.trim().length > 0) : [];
+      const paragraphCount = paragraphs.length;
+
+      const totalWordLength = words.reduce((sum, w) => sum + w.length, 0);
+      const avgWordLength = wordCount > 0 ? (totalWordLength / wordCount).toFixed(1) : "0";
+
+      const readingMinutes = wordCount > 0 ? Math.max(1, Math.ceil(wordCount / WORDS_PER_MINUTE)) : 0;
+
+      charsWithSpacesEl.textContent = charsWithSpaces;
+      charsNoSpacesEl.textContent = charsNoSpaces;
+      wordCountEl.textContent = wordCount;
+      sentenceCountEl.textContent = sentenceCount;
+      paragraphCountEl.textContent = paragraphCount;
+      avgWordLengthEl.textContent = avgWordLength;
+      readingTimeEl.textContent = `${readingMinutes} min`;
+    }
+
+    function copyStats() {
+      const stats = [
+        `Tegn (med mellomrom): ${charsWithSpacesEl.textContent}`,
+        `Tegn (uten mellomrom): ${charsNoSpacesEl.textContent}`,
+        `Ord: ${wordCountEl.textContent}`,
+        `Setninger: ${sentenceCountEl.textContent}`,
+        `Avsnitt: ${paragraphCountEl.textContent}`,
+        `Snitt ordlengde: ${avgWordLengthEl.textContent}`,
+        `Estimert lesetid: ${readingTimeEl.textContent}`
+      ].join("\n");
+      navigator.clipboard.writeText(stats);
+    }
+
+    textInput.addEventListener("input", updateStats);
+    copyBtn.addEventListener("click", copyStats);
+    clearBtn.addEventListener("click", () => {
+      textInput.value = "";
+      updateStats();
+      textInput.focus();
+    });
+
+    updateStats();
+  </script>
+</body>
+</html>

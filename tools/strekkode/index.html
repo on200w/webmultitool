@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Strekkode-generator</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jsbarcode/3.11.5/JsBarcode.all.min.js"></script>
+  <style>
+    :root {
+      --brand-green: #009d4f;
+      --brand-deep-green: #005850;
+      --brand-light: #cfd2d3;
+      --surface: rgba(255, 255, 255, 0.94);
+      --text: #12332f;
+      --muted: #385552;
+      --border: #afbbbb;
+      --danger: #8b2020;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Segoe UI", Calibri, sans-serif;
+      color: var(--text);
+      background: linear-gradient(140deg, #edf6f1, #cfd2d3);
+      padding: 20px;
+    }
+    .wrap { width: min(1200px, 100%); margin: 0 auto; }
+    h1 { margin: 0 0 12px; }
+    .layout { display: grid; grid-template-columns: 340px 1fr; gap: 16px; }
+    .panel, .preview {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px;
+    }
+    .panel { display: grid; gap: 10px; align-content: start; }
+    label { display: block; font-weight: 600; margin-bottom: 4px; }
+    input[type="text"], input[type="number"], input[type="color"], select, button {
+      width: 100%;
+      font: inherit;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 9px 10px;
+      background: #fff;
+      color: var(--text);
+    }
+    input[type="color"] { height: 44px; padding: 4px; cursor: pointer; }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .checkbox { display: flex; align-items: center; gap: 8px; }
+    .checkbox input { width: auto; }
+    .btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    button { cursor: pointer; font-weight: 700; }
+    #generateBtn { background: var(--brand-green); color: #fff; border-color: transparent; }
+    #downloadPngBtn, #downloadSvgBtn { background: var(--brand-deep-green); color: #fff; border-color: transparent; }
+    .preview { display: grid; place-items: center; min-height: 320px; }
+    .status { color: var(--muted); font-size: 0.9rem; min-height: 1.2em; }
+    .status.error { color: var(--danger); font-weight: 600; }
+    .back { display: inline-block; margin-top: 10px; color: var(--brand-deep-green); font-weight: 700; text-decoration: none; }
+    .back:hover { text-decoration: underline; }
+    @media (max-width: 950px) { .layout { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <h1>Strekkode-generator</h1>
+    <div class="layout">
+      <section class="panel">
+        <div>
+          <label for="valueInput">Verdi</label>
+          <input id="valueInput" type="text" value="123456789012" placeholder="Skriv inn tekst eller tall" />
+        </div>
+        <div>
+          <label for="formatSelect">Format</label>
+          <select id="formatSelect">
+            <option value="CODE128">CODE128 (tekst og tall)</option>
+            <option value="EAN13">EAN-13</option>
+            <option value="EAN8">EAN-8</option>
+            <option value="UPC">UPC-A</option>
+            <option value="CODE39">CODE39</option>
+            <option value="ITF14">ITF-14</option>
+          </select>
+        </div>
+        <div class="row">
+          <div>
+            <label for="lineColor">Strekfarge</label>
+            <input id="lineColor" type="color" value="#12332f" />
+          </div>
+          <div>
+            <label for="bgColor">Bakgrunnsfarge</label>
+            <input id="bgColor" type="color" value="#ffffff" />
+          </div>
+        </div>
+        <div class="row">
+          <div>
+            <label for="widthInput">Strekbredde</label>
+            <input id="widthInput" type="number" min="1" max="6" value="2" />
+          </div>
+          <div>
+            <label for="heightInput">Høyde</label>
+            <input id="heightInput" type="number" min="30" max="300" value="100" />
+          </div>
+        </div>
+        <div class="checkbox">
+          <input id="displayValue" type="checkbox" checked />
+          <label for="displayValue" style="margin:0;">Vis verdi under koden</label>
+        </div>
+        <div class="btns">
+          <button id="generateBtn" type="button">Generer strekkode</button>
+        </div>
+        <div class="btns">
+          <button id="downloadPngBtn" type="button">Last ned PNG</button>
+          <button id="downloadSvgBtn" type="button">Last ned SVG</button>
+        </div>
+        <p id="status" class="status" aria-live="polite"></p>
+        <a class="back" href="../../index.html">Tilbake til hovedmeny</a>
+      </section>
+
+      <section class="preview">
+        <svg id="barcode"></svg>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    const valueInput = document.getElementById("valueInput");
+    const formatSelect = document.getElementById("formatSelect");
+    const lineColor = document.getElementById("lineColor");
+    const bgColor = document.getElementById("bgColor");
+    const widthInput = document.getElementById("widthInput");
+    const heightInput = document.getElementById("heightInput");
+    const displayValue = document.getElementById("displayValue");
+    const generateBtn = document.getElementById("generateBtn");
+    const downloadPngBtn = document.getElementById("downloadPngBtn");
+    const downloadSvgBtn = document.getElementById("downloadSvgBtn");
+    const statusEl = document.getElementById("status");
+    const svgEl = document.getElementById("barcode");
+
+    function setStatus(message, isError = false) {
+      statusEl.textContent = message;
+      statusEl.classList.toggle("error", isError);
+    }
+
+    function generateBarcode() {
+      try {
+        JsBarcode(svgEl, valueInput.value.trim(), {
+          format: formatSelect.value,
+          lineColor: lineColor.value,
+          background: bgColor.value,
+          width: Number.parseInt(widthInput.value, 10) || 2,
+          height: Number.parseInt(heightInput.value, 10) || 100,
+          displayValue: displayValue.checked,
+          margin: 12
+        });
+        setStatus("Strekkode generert.");
+      } catch (err) {
+        setStatus(err.message || "Kunne ikke generere strekkode. Sjekk verdi og format.", true);
+      }
+    }
+
+    function downloadSvg() {
+      const serializer = new XMLSerializer();
+      const source = serializer.serializeToString(svgEl);
+      const blob = new Blob([source], { type: "image/svg+xml" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "strekkode.svg";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    function downloadPng() {
+      const serializer = new XMLSerializer();
+      const source = serializer.serializeToString(svgEl);
+      const svgBlob = new Blob([source], { type: "image/svg+xml;charset=utf-8" });
+      const url = URL.createObjectURL(svgBlob);
+      const img = new Image();
+      img.onload = () => {
+        const bbox = svgEl.getBBox ? svgEl.viewBox.baseVal : null;
+        const width = svgEl.width.baseVal.value || img.width;
+        const height = svgEl.height.baseVal.value || img.height;
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, width, height);
+        URL.revokeObjectURL(url);
+        const a = document.createElement("a");
+        a.href = canvas.toDataURL("image/png");
+        a.download = "strekkode.png";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      };
+      img.src = url;
+    }
+
+    generateBtn.addEventListener("click", generateBarcode);
+    downloadSvgBtn.addEventListener("click", downloadSvg);
+    downloadPngBtn.addEventListener("click", downloadPng);
+    [formatSelect, lineColor, bgColor, widthInput, heightInput, displayValue].forEach((el) => {
+      el.addEventListener("input", generateBarcode);
+      el.addEventListener("change", generateBarcode);
+    });
+    valueInput.addEventListener("input", generateBarcode);
+
+    generateBarcode();
+  </script>
+</body>
+</html>
