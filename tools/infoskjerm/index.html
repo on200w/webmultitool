@@ -95,6 +95,42 @@
     <h1>Infoskjerm-planlegger</h1>
     <div class="layout">
       <section class="panel">
+        <div class="row">
+          <div>
+            <label for="screenBg">Skjermbakgrunn</label>
+            <input id="screenBg" type="color" value="#0f2d29" />
+          </div>
+          <div>
+            <label for="screenTextColor">Tekstfarge</label>
+            <input id="screenTextColor" type="color" value="#ffffff" />
+          </div>
+        </div>
+        <div class="row">
+          <div>
+            <label for="screenAccent">Aksentfarge</label>
+            <input id="screenAccent" type="color" value="#009d4f" />
+          </div>
+          <div>
+            <label for="screenAlign">Justering</label>
+            <select id="screenAlign">
+              <option value="left">Venstre</option>
+              <option value="center" selected>Senter</option>
+              <option value="right">Høyre</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label for="screenFont">Skriftype</label>
+          <select id="screenFont">
+            <option value="'Segoe UI', Calibri, sans-serif">Segoe UI</option>
+            <option value="Georgia, serif">Georgia</option>
+            <option value="'Times New Roman', serif">Times New Roman</option>
+            <option value="Arial, sans-serif">Arial</option>
+            <option value="'Courier New', monospace">Courier New</option>
+            <option value="Impact, sans-serif">Impact</option>
+            <option value="Verdana, sans-serif">Verdana</option>
+          </select>
+        </div>
         <div>
           <label for="slideTitle">Slide-tittel</label>
           <input id="slideTitle" type="text" placeholder="F.eks. Møtetid endret" />
@@ -140,12 +176,19 @@
   </main>
 
   <script>
+    const screenBgEl = document.getElementById("screenBg");
+    const screenTextColorEl = document.getElementById("screenTextColor");
+    const screenAccentEl = document.getElementById("screenAccent");
+    const screenAlignEl = document.getElementById("screenAlign");
+    const screenFontEl = document.getElementById("screenFont");
+
     const slideTitle = document.getElementById("slideTitle");
     const slideText = document.getElementById("slideText");
     const slideDuration = document.getElementById("slideDuration");
     const slideList = document.getElementById("slideList");
     const exportData = document.getElementById("exportData");
 
+    const screenEl = document.querySelector(".screen");
     const screenTitle = document.getElementById("screenTitle");
     const screenText = document.getElementById("screenText");
     const screenMeta = document.getElementById("screenMeta");
@@ -160,6 +203,17 @@
     let slides = [];
     let currentIndex = 0;
     let loopTimer = null;
+
+    function applyScreenStyle() {
+      const align = screenAlignEl.value;
+      screenEl.style.background = screenBgEl.value;
+      screenEl.style.color = screenTextColorEl.value;
+      screenEl.style.fontFamily = screenFontEl.value;
+      screenEl.style.textAlign = align;
+      screenEl.style.justifyItems = align === "center" ? "center" : align === "right" ? "end" : "start";
+      screenEl.style.borderTop = `6px solid ${screenAccentEl.value}`;
+      screenMeta.style.color = screenAccentEl.value;
+    }
 
     function renderList() {
       slideList.innerHTML = "";
@@ -198,6 +252,7 @@
     }
 
     function previewCurrent() {
+      applyScreenStyle();
       if (slides.length === 0) {
         screenTitle.textContent = "Ingen slides ennå";
         screenText.textContent = "Legg til første slide i menyen til venstre.";
@@ -291,6 +346,12 @@
       }
     });
 
+    [screenBgEl, screenTextColorEl, screenAccentEl, screenAlignEl, screenFontEl].forEach((el) => {
+      el.addEventListener("input", applyScreenStyle);
+      el.addEventListener("change", applyScreenStyle);
+    });
+
+    applyScreenStyle();
     renderList();
     previewCurrent();
   </script>

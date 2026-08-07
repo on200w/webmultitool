@@ -79,6 +79,40 @@
           </select>
         </div>
         <div>
+          <label for="layoutStyle">Layout</label>
+          <select id="layoutStyle">
+            <option value="banner">Banner topp og bunn</option>
+            <option value="sidebar">Sidestolpe</option>
+            <option value="minimal">Minimalistisk</option>
+          </select>
+        </div>
+        <div class="row">
+          <div>
+            <label for="fontFamily">Skriftype</label>
+            <select id="fontFamily">
+              <option value="'Segoe UI', Calibri, sans-serif">Segoe UI</option>
+              <option value="Georgia, serif">Georgia</option>
+              <option value="'Times New Roman', serif">Times New Roman</option>
+              <option value="Arial, sans-serif">Arial</option>
+              <option value="'Courier New', monospace">Courier New</option>
+              <option value="Impact, sans-serif">Impact</option>
+              <option value="Verdana, sans-serif">Verdana</option>
+            </select>
+          </div>
+          <div>
+            <label for="textAlignSel">Tekstjustering</label>
+            <select id="textAlignSel">
+              <option value="left">Venstre</option>
+              <option value="center">Senter</option>
+              <option value="right">Høyre</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label for="headerText">Overskriftsbanner</label>
+          <input id="headerText" type="text" value="INFORMASJON" />
+        </div>
+        <div>
           <label for="title">Tittel</label>
           <input id="title" type="text" value="Viktig informasjon" />
         </div>
@@ -104,6 +138,16 @@
             <input id="accent" type="color" value="#009d4f" />
           </div>
         </div>
+        <div class="row">
+          <div>
+            <label for="textColor">Tekstfarge</label>
+            <input id="textColor" type="color" value="#12332f" />
+          </div>
+          <div>
+            <label for="headerTextColor">Bannertekstfarge</label>
+            <input id="headerTextColor" type="color" value="#ffffff" />
+          </div>
+        </div>
         <div class="btns">
           <button id="renderBtn" type="button">Oppdater</button>
           <button id="downloadBtn" type="button">Last ned PNG</button>
@@ -118,38 +162,52 @@
   </main>
   <script>
     const formatEl = document.getElementById("format");
+    const layoutStyleEl = document.getElementById("layoutStyle");
+    const fontFamilyEl = document.getElementById("fontFamily");
+    const textAlignEl = document.getElementById("textAlignSel");
+    const headerTextEl = document.getElementById("headerText");
     const titleEl = document.getElementById("title");
     const subtitleEl = document.getElementById("subtitle");
     const bodyEl = document.getElementById("body");
     const contactEl = document.getElementById("contact");
     const bgEl = document.getElementById("bg");
     const accentEl = document.getElementById("accent");
+    const textColorEl = document.getElementById("textColor");
+    const headerTextColorEl = document.getElementById("headerTextColor");
     const renderBtn = document.getElementById("renderBtn");
     const downloadBtn = document.getElementById("downloadBtn");
     const canvas = document.getElementById("posterCanvas");
     const metaEl = document.getElementById("meta");
     const ctx = canvas.getContext("2d");
 
-    function wrapText(text, maxWidth, fontSize, lineHeight, x, y, color) {
-      ctx.font = `${fontSize}px Segoe UI`;
+    function alignX(align, margin, w) {
+      if (align === "center") return w / 2;
+      if (align === "right") return w - margin;
+      return margin;
+    }
+
+    function wrapText(text, maxWidth, fontSize, lineHeight, x, y, color, align, fontFamily) {
+      ctx.font = `${fontSize}px ${fontFamily}`;
       ctx.fillStyle = color;
-      const words = text.split(/\s+/);
+      ctx.textAlign = align;
+      const words = text.split(/\s+/).filter(Boolean);
+      const lines = [];
       let line = "";
-      let currentY = y;
       for (const word of words) {
         const candidate = line ? `${line} ${word}` : word;
         if (ctx.measureText(candidate).width > maxWidth && line) {
-          ctx.fillText(line, x, currentY);
+          lines.push(line);
           line = word;
-          currentY += lineHeight;
         } else {
           line = candidate;
         }
       }
-      if (line) {
-        ctx.fillText(line, x, currentY);
+      if (line) lines.push(line);
+      let currentY = y;
+      lines.forEach((l) => {
+        ctx.fillText(l, x, currentY);
         currentY += lineHeight;
-      }
+      });
       return currentY;
     }
 
@@ -158,35 +216,79 @@
       canvas.width = w;
       canvas.height = h;
 
+      const layout = layoutStyleEl.value;
+      const fontFamily = fontFamilyEl.value;
+      const align = textAlignEl.value;
       const margin = Math.round(w * 0.08);
-      const headerH = Math.round(h * 0.13);
+      const textColor = textColorEl.value;
 
+      ctx.textAlign = "left";
       ctx.fillStyle = bgEl.value;
       ctx.fillRect(0, 0, w, h);
 
-      ctx.fillStyle = accentEl.value;
-      ctx.fillRect(0, 0, w, headerH);
+      let y = Math.round(h * 0.12);
+      let contentMargin = margin;
 
-      ctx.fillStyle = "#ffffff";
-      ctx.font = `700 ${Math.round(w * 0.055)}px Segoe UI`;
-      ctx.fillText("INFORMASJON", margin, Math.round(headerH * 0.62));
+      if (layout === "banner") {
+        const headerH = Math.round(h * 0.13);
+        const headerX = alignX(align, margin, w);
+        ctx.fillStyle = accentEl.value;
+        ctx.fillRect(0, 0, w, headerH);
+        ctx.fillStyle = headerTextColorEl.value;
+        ctx.textAlign = align;
+        ctx.font = `700 ${Math.round(w * 0.055)}px ${fontFamily}`;
+        ctx.fillText(headerTextEl.value.trim() || "", headerX, Math.round(headerH * 0.62));
+        y = headerH + Math.round(h * 0.08);
+      } else if (layout === "sidebar") {
+        const barW = Math.round(w * 0.03);
+        ctx.fillStyle = accentEl.value;
+        ctx.fillRect(0, 0, barW, h);
+        contentMargin = margin + Math.round(w * 0.02);
+        y = Math.round(h * 0.1);
+      } else {
+        y = Math.round(h * 0.12);
+      }
 
-      const textColor = "#12332f";
-      let y = headerH + Math.round(h * 0.08);
-      y = wrapText(titleEl.value.trim() || "", w - margin * 2, Math.round(w * 0.06), Math.round(w * 0.075), margin, y, textColor);
+      const contentX = alignX(align, contentMargin, w);
+      const maxWidth = w - contentMargin * 2;
+
+      y = wrapText(titleEl.value.trim() || "", maxWidth, Math.round(w * 0.06), Math.round(w * 0.075), contentX, y, textColor, align, fontFamily);
+
+      if (layout === "minimal") {
+        const underlineY = y - Math.round(w * 0.075) + Math.round(w * 0.01);
+        const underlineWidth = Math.round(w * 0.16);
+        let lineStartX = contentMargin;
+        if (align === "center") lineStartX = w / 2 - underlineWidth / 2;
+        else if (align === "right") lineStartX = w - contentMargin - underlineWidth;
+        ctx.strokeStyle = accentEl.value;
+        ctx.lineWidth = Math.max(2, Math.round(w * 0.006));
+        ctx.beginPath();
+        ctx.moveTo(lineStartX, underlineY);
+        ctx.lineTo(lineStartX + underlineWidth, underlineY);
+        ctx.stroke();
+        y += Math.round(h * 0.01);
+      }
+
       y += Math.round(h * 0.015);
-      y = wrapText(subtitleEl.value.trim() || "", w - margin * 2, Math.round(w * 0.035), Math.round(w * 0.05), margin, y, "#35514d");
+      y = wrapText(subtitleEl.value.trim() || "", maxWidth, Math.round(w * 0.035), Math.round(w * 0.05), contentX, y, "#35514d", align, fontFamily);
       y += Math.round(h * 0.02);
-      y = wrapText(bodyEl.value.trim() || "", w - margin * 2, Math.round(w * 0.03), Math.round(w * 0.045), margin, y, textColor);
+      y = wrapText(bodyEl.value.trim() || "", maxWidth, Math.round(w * 0.03), Math.round(w * 0.045), contentX, y, textColor, align, fontFamily);
 
-      const footerH = Math.round(h * 0.1);
-      ctx.fillStyle = "#cfd2d3";
-      ctx.fillRect(0, h - footerH, w, footerH);
-      ctx.fillStyle = "#12332f";
-      ctx.font = `600 ${Math.round(w * 0.026)}px Segoe UI`;
-      ctx.fillText(contactEl.value.trim() || "", margin, h - Math.round(footerH * 0.42));
+      ctx.font = `600 ${Math.round(w * 0.026)}px ${fontFamily}`;
+      ctx.textAlign = align;
+      if (layout === "banner") {
+        const footerH = Math.round(h * 0.1);
+        ctx.fillStyle = "#cfd2d3";
+        ctx.fillRect(0, h - footerH, w, footerH);
+        ctx.fillStyle = "#12332f";
+        ctx.fillText(contactEl.value.trim() || "", contentX, h - Math.round(footerH * 0.42));
+      } else {
+        ctx.fillStyle = textColor;
+        ctx.fillText(contactEl.value.trim() || "", contentX, h - Math.round(h * 0.04));
+      }
 
-      metaEl.textContent = `Format: ${w} x ${h}`;
+      ctx.textAlign = "left";
+      metaEl.textContent = `Format: ${w} x ${h} • Layout: ${layoutStyleEl.options[layoutStyleEl.selectedIndex].text}`;
     }
 
     function downloadPng() {
@@ -200,8 +302,12 @@
 
     renderBtn.addEventListener("click", renderPoster);
     downloadBtn.addEventListener("click", downloadPng);
-    [formatEl, titleEl, subtitleEl, bodyEl, contactEl, bgEl, accentEl].forEach((el) => {
+    [
+      formatEl, layoutStyleEl, fontFamilyEl, textAlignEl, headerTextEl,
+      titleEl, subtitleEl, bodyEl, contactEl, bgEl, accentEl, textColorEl, headerTextColorEl
+    ].forEach((el) => {
       el.addEventListener("input", renderPoster);
+      el.addEventListener("change", renderPoster);
     });
 
     renderPoster();
