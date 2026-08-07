@@ -38,30 +38,30 @@ source/
 
 Rask generering av QR-koder fra tekst eller lenke. Du kan velge forgrunns- og bakgrunnsfarge, legge til en egen logo midt i koden, og laste den ned som PNG, JPG eller SVG.
 
-![QR-kode generator](images/qr-generator-simple.png)
+![QR-kode generator](source/images/qr-generator-simple.png)
 
 ### QR-kode generator (utvidet)
 
 Samme utgangspunkt som den enkle versjonen, men med flere innstillinger: feilkorrigeringsnivå, størrelse og margin på koden, i tillegg til auto-generering mens du skriver og en nullstill-knapp.
 
-![QR-kode generator](images/qr-generator-plus.png)
+![QR-kode generator](source/images/qr-generator-plus.png)
 
 ### Plakatgenerator
 
 Lager plakater/skjermbilder til print eller digitale infoskjermer. Støtter flere formater (A4/A3 og skjerm i stående/liggende), tre layout-maler (banner, sidestolpe, minimalistisk), valgfri skrifttype og tekstjustering, og egne fargevelgere for bakgrunn, aksent og tekst. Resultatet rendres på et canvas og lastes ned som PNG.
 
-![Plakatgenerator - verktøyet](images/plakat-tool.png)
+![Plakatgenerator - verktøyet](source/images/plakat-tool.png)
 
-![Plakatgenerator - banner](images/plakat-banner.png)
-![Plakatgenerator - sidestolpe](images/plakat-sidebar.png)
-![Plakatgenerator - minimalistisk](images/plakat-minimal.png)
+![Plakatgenerator - banner](source/images/plakat-banner.png)
+![Plakatgenerator - sidestolpe](source/images/plakat-sidebar.png)
+![Plakatgenerator - minimalistisk](source/images/plakat-minimal.png)
 
 ### Infoskjerm-planlegger
 
 Bygger en spilleliste med informasjonsslides (tittel, tekst, varighet) som kan forhåndsvises i en automatisk loop – nyttig for planlegging av innhold til en infoskjerm. Skjermbakgrunn, tekstfarge, aksentfarge, skrifttype og justering kan tilpasses, og listen kan eksporteres/importeres som JSON.
 
-![Infoskjerm-planlegger - standard](images/infoskjerm-preview.png)
-![Infoskjerm-planlegger - tilpasset](images/infoskjerm-custom.png)
+![Infoskjerm-planlegger - standard](source/images/infoskjerm-preview.png)
+![Infoskjerm-planlegger - tilpasset](source/images/infoskjerm-custom.png)
 
 ### Videomanus-kort
 
