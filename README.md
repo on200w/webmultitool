@@ -1,22 +1,24 @@
 # Webmultiverktøy
 
-En samling frittstående nettbaserte verktøy. Ingen backend, ingen bygg-steg — hvert verktøy er én HTML-fil med inline CSS og JavaScript. Åpne [index.html](index.html) i nettleseren for å starte.
+En samling frittstående nettbaserte verktøy. Ingen backend, ingen bygg-steg — hvert verktøy er én HTML-fil med inline CSS og JavaScript. Bruk snarveien `Verktoy - START HER.lnk` i rotmappen, eller åpne [source/app/index.html](source/app/index.html) direkte i nettleseren, for å starte.
 
 ## Mappestruktur
 
 ```
-index.html                 Hovedmeny med lenker til alle verktøy/kategorier
-tools/
-  qr/index.html            Undermeny: velg mellom enkel og utvidet QR-generator
-  qr-simple/index.html      QR-kode generator (enkel)
-  qr-plus/index.html        QR-kode generator (utvidet)
-  innhold/index.html        Undermeny: plakat, infoskjerm og video
-  plakat/index.html         Plakatgenerator
-  infoskjerm/index.html     Infoskjerm-planlegger
-  video/index.html          Videomanus-kort
-  fargepalett/index.html    Fargepalett-verktøy
-  tekstteller/index.html    Tekst-/ord-teller
-  strekkode/index.html      Strekkode-generator
+Verktoy - START HER.lnk    Snarvei med eget ikon som åpner source/app/index.html
+source/
+  app/index.html           Hovedmeny med lenker til alle verktøy/kategorier
+  tools/
+    qr/index.html           Undermeny: velg mellom enkel og utvidet QR-generator
+    qr-simple/index.html    QR-kode generator (enkel)
+    qr-plus/index.html      QR-kode generator (utvidet)
+    innhold/index.html      Undermeny: plakat, infoskjerm og video
+    plakat/index.html       Plakatgenerator
+    infoskjerm/index.html   Infoskjerm-planlegger
+    video/index.html        Videomanus-kort
+    fargepalett/index.html  Fargepalett-verktøy
+    tekstteller/index.html  Tekst-/ord-teller
+    strekkode/index.html    Strekkode-generator
 ```
 
 ## Verktøy
