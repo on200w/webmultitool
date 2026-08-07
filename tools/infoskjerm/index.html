@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Infoskjerm-planlegger</title>
+  <style>
+    :root {
+      --brand-green: #009d4f;
+      --brand-deep-green: #005850;
+      --brand-light: #cfd2d3;
+      --surface: rgba(255, 255, 255, 0.94);
+      --text: #12332f;
+      --muted: #385552;
+      --border: #afbbbb;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Segoe UI", Calibri, sans-serif;
+      color: var(--text);
+      background: linear-gradient(140deg, #edf6f1, #cfd2d3);
+      padding: 20px;
+    }
+    .wrap { width: min(1200px, 100%); margin: 0 auto; }
+    h1 { margin: 0 0 12px; }
+    .layout { display: grid; grid-template-columns: 380px 1fr; gap: 16px; }
+    .panel, .preview {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px;
+    }
+    .panel { display: grid; gap: 10px; align-content: start; }
+    label { display: block; font-weight: 600; margin-bottom: 4px; }
+    input[type="text"], textarea, input[type="number"], button {
+      width: 100%;
+      font: inherit;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 9px 10px;
+      background: #fff;
+      color: var(--text);
+    }
+    textarea { min-height: 90px; resize: vertical; }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    button { cursor: pointer; font-weight: 700; }
+    #addBtn, #startBtn { background: var(--brand-green); color: #fff; border-color: transparent; }
+    #stopBtn, #clearBtn { background: var(--brand-deep-green); color: #fff; border-color: transparent; }
+    .list { border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+    .item {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+      align-items: start;
+      padding: 9px 10px;
+      border-bottom: 1px solid #dfe5e5;
+      background: #fff;
+    }
+    .item:last-child { border-bottom: none; }
+    .remove {
+      border: none;
+      background: #e8efee;
+      color: #12332f;
+      border-radius: 8px;
+      padding: 4px 8px;
+      cursor: pointer;
+      font-weight: 700;
+    }
+    .screen {
+      width: min(100%, 860px);
+      aspect-ratio: 16 / 9;
+      background: #0f2d29;
+      color: #fff;
+      border-radius: 12px;
+      padding: 26px;
+      display: grid;
+      align-content: center;
+      gap: 18px;
+      margin: 0 auto;
+    }
+    .screen h2 { margin: 0; font-size: clamp(1.4rem, 2.5vw, 2.2rem); }
+    .screen p { margin: 0; font-size: clamp(1rem, 1.9vw, 1.35rem); line-height: 1.45; }
+    .meta { color: #d8ece8; font-size: 0.92rem; }
+    .export { min-height: 110px; }
+    .back { display: inline-block; margin-top: 10px; color: var(--brand-deep-green); font-weight: 700; text-decoration: none; }
+    .back:hover { text-decoration: underline; }
+    @media (max-width: 980px) { .layout { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <h1>Infoskjerm-planlegger</h1>
+    <div class="layout">
+      <section class="panel">
+        <div class="row">
+          <div>
+            <label for="screenBg">Skjermbakgrunn</label>
+            <input id="screenBg" type="color" value="#0f2d29" />
+          </div>
+          <div>
+            <label for="screenTextColor">Tekstfarge</label>
+            <input id="screenTextColor" type="color" value="#ffffff" />
+          </div>
+        </div>
+        <div class="row">
+          <div>
+            <label for="screenAccent">Aksentfarge</label>
+            <input id="screenAccent" type="color" value="#009d4f" />
+          </div>
+          <div>
+            <label for="screenAlign">Justering</label>
+            <select id="screenAlign">
+              <option value="left">Venstre</option>
+              <option value="center" selected>Senter</option>
+              <option value="right">Høyre</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label for="screenFont">Skriftype</label>
+          <select id="screenFont">
+            <option value="'Segoe UI', Calibri, sans-serif">Segoe UI</option>
+            <option value="Georgia, serif">Georgia</option>
+            <option value="'Times New Roman', serif">Times New Roman</option>
+            <option value="Arial, sans-serif">Arial</option>
+            <option value="'Courier New', monospace">Courier New</option>
+            <option value="Impact, sans-serif">Impact</option>
+            <option value="Verdana, sans-serif">Verdana</option>
+          </select>
+        </div>
+        <div>
+          <label for="slideTitle">Slide-tittel</label>
+          <input id="slideTitle" type="text" placeholder="F.eks. Møtetid endret" />
+        </div>
+        <div>
+          <label for="slideText">Slide-tekst</label>
+          <textarea id="slideText" placeholder="Informasjon som skal vises på skjermen"></textarea>
+        </div>
+        <div>
+          <label for="slideDuration">Varighet (sekunder)</label>
+          <input id="slideDuration" type="number" min="2" max="120" value="8" />
+        </div>
+        <div class="btns">
+          <button id="addBtn" type="button">Legg til slide</button>
+          <button id="clearBtn" type="button">Tøm liste</button>
+        </div>
+
+        <div class="list" id="slideList"></div>
+
+        <div class="row">
+          <button id="startBtn" type="button">Start loop</button>
+          <button id="stopBtn" type="button">Stopp</button>
+        </div>
+
+        <label for="exportData">JSON (kopi/lim inn)</label>
+        <textarea id="exportData" class="export" placeholder="Eksportert JSON vises her"></textarea>
+        <div class="btns">
+          <button id="exportBtn" type="button">Eksporter JSON</button>
+          <button id="importBtn" type="button">Importer JSON</button>
+        </div>
+
+        <a class="back" href="../innhold/index.html">Tilbake til innholdsmeny</a>
+      </section>
+
+      <section class="preview">
+        <div class="screen">
+          <h2 id="screenTitle">Ingen slides ennå</h2>
+          <p id="screenText">Legg til første slide i menyen til venstre.</p>
+          <div class="meta" id="screenMeta">Klar</div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    const screenBgEl = document.getElementById("screenBg");
+    const screenTextColorEl = document.getElementById("screenTextColor");
+    const screenAccentEl = document.getElementById("screenAccent");
+    const screenAlignEl = document.getElementById("screenAlign");
+    const screenFontEl = document.getElementById("screenFont");
+
+    const slideTitle = document.getElementById("slideTitle");
+    const slideText = document.getElementById("slideText");
+    const slideDuration = document.getElementById("slideDuration");
+    const slideList = document.getElementById("slideList");
+    const exportData = document.getElementById("exportData");
+
+    const screenEl = document.querySelector(".screen");
+    const screenTitle = document.getElementById("screenTitle");
+    const screenText = document.getElementById("screenText");
+    const screenMeta = document.getElementById("screenMeta");
+
+    const addBtn = document.getElementById("addBtn");
+    const clearBtn = document.getElementById("clearBtn");
+    const startBtn = document.getElementById("startBtn");
+    const stopBtn = document.getElementById("stopBtn");
+    const exportBtn = document.getElementById("exportBtn");
+    const importBtn = document.getElementById("importBtn");
+
+    let slides = [];
+    let currentIndex = 0;
+    let loopTimer = null;
+
+    function applyScreenStyle() {
+      const align = screenAlignEl.value;
+      screenEl.style.background = screenBgEl.value;
+      screenEl.style.color = screenTextColorEl.value;
+      screenEl.style.fontFamily = screenFontEl.value;
+      screenEl.style.textAlign = align;
+      screenEl.style.justifyItems = align === "center" ? "center" : align === "right" ? "end" : "start";
+      screenEl.style.borderTop = `6px solid ${screenAccentEl.value}`;
+      screenMeta.style.color = screenAccentEl.value;
+    }
+
+    function renderList() {
+      slideList.innerHTML = "";
+      if (slides.length === 0) {
+        const empty = document.createElement("div");
+        empty.className = "item";
+        empty.innerHTML = "<div>Ingen slides lagt til.</div>";
+        slideList.appendChild(empty);
+        return;
+      }
+
+      slides.forEach((slide, index) => {
+        const row = document.createElement("div");
+        row.className = "item";
+
+        const info = document.createElement("div");
+        info.innerHTML = `<strong>${index + 1}. ${slide.title}</strong><br>${slide.duration}s`;
+
+        const removeBtn = document.createElement("button");
+        removeBtn.className = "remove";
+        removeBtn.type = "button";
+        removeBtn.textContent = "Fjern";
+        removeBtn.addEventListener("click", () => {
+          slides.splice(index, 1);
+          if (currentIndex >= slides.length) {
+            currentIndex = 0;
+          }
+          renderList();
+          previewCurrent();
+        });
+
+        row.appendChild(info);
+        row.appendChild(removeBtn);
+        slideList.appendChild(row);
+      });
+    }
+
+    function previewCurrent() {
+      applyScreenStyle();
+      if (slides.length === 0) {
+        screenTitle.textContent = "Ingen slides ennå";
+        screenText.textContent = "Legg til første slide i menyen til venstre.";
+        screenMeta.textContent = "Klar";
+        return;
+      }
+      const slide = slides[currentIndex];
+      screenTitle.textContent = slide.title;
+      screenText.textContent = slide.text;
+      screenMeta.textContent = `Slide ${currentIndex + 1} av ${slides.length} • ${slide.duration} sek`;
+    }
+
+    function stopLoop() {
+      if (loopTimer) {
+        clearTimeout(loopTimer);
+        loopTimer = null;
+      }
+      screenMeta.textContent += " • stoppet";
+    }
+
+    function runLoop() {
+      if (slides.length === 0) {
+        screenMeta.textContent = "Legg til minst én slide først.";
+        return;
+      }
+      stopLoop();
+
+      function next() {
+        previewCurrent();
+        const delay = Math.max(2, Number.parseInt(slides[currentIndex].duration, 10)) * 1000;
+        currentIndex = (currentIndex + 1) % slides.length;
+        loopTimer = setTimeout(next, delay);
+      }
+
+      next();
+    }
+
+    addBtn.addEventListener("click", () => {
+      const title = slideTitle.value.trim();
+      const text = slideText.value.trim();
+      const duration = Math.max(2, Number.parseInt(slideDuration.value, 10) || 8);
+      if (!title || !text) {
+        screenMeta.textContent = "Tittel og tekst må fylles ut.";
+        return;
+      }
+      slides.push({ title, text, duration });
+      slideTitle.value = "";
+      slideText.value = "";
+      slideDuration.value = String(duration);
+      currentIndex = slides.length - 1;
+      renderList();
+      previewCurrent();
+    });
+
+    clearBtn.addEventListener("click", () => {
+      slides = [];
+      currentIndex = 0;
+      stopLoop();
+      renderList();
+      previewCurrent();
+    });
+
+    startBtn.addEventListener("click", runLoop);
+    stopBtn.addEventListener("click", stopLoop);
+
+    exportBtn.addEventListener("click", () => {
+      exportData.value = JSON.stringify(slides, null, 2);
+      screenMeta.textContent = "JSON eksportert.";
+    });
+
+    importBtn.addEventListener("click", () => {
+      try {
+        const parsed = JSON.parse(exportData.value);
+        if (!Array.isArray(parsed)) {
+          throw new Error("Forventer en liste med slides.");
+        }
+        slides = parsed
+          .filter((s) => s && typeof s.title === "string" && typeof s.text === "string")
+          .map((s) => ({
+            title: s.title,
+            text: s.text,
+            duration: Math.max(2, Number.parseInt(s.duration, 10) || 8)
+          }));
+        currentIndex = 0;
+        stopLoop();
+        renderList();
+        previewCurrent();
+        screenMeta.textContent = "JSON importert.";
+      } catch (err) {
+        screenMeta.textContent = `Importfeil: ${err.message}`;
+      }
+    });
+
+    [screenBgEl, screenTextColorEl, screenAccentEl, screenAlignEl, screenFontEl].forEach((el) => {
+      el.addEventListener("input", applyScreenStyle);
+      el.addEventListener("change", applyScreenStyle);
+    });
+
+    applyScreenStyle();
+    renderList();
+    previewCurrent();
+  </script>
+</body>
+</html>
