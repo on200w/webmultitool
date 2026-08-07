@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="360" viewBox="0 0 1200 360" role="img" aria-label="Arbeidsflyt for QR-generator">
+  <rect width="1200" height="360" fill="#ffffff"/>
+  <text x="60" y="62" font-family="Segoe UI, Arial, sans-serif" font-size="42" fill="#12332f" font-weight="700">Arbeidsflyt</text>
+
+  <defs>
+    <marker id="pil" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#005850"/>
+    </marker>
+  </defs>
+
+  <rect x="60" y="120" width="280" height="120" rx="14" fill="#009d4f"/>
+  <text x="200" y="188" font-family="Segoe UI, Arial, sans-serif" font-size="32" text-anchor="middle" fill="#0b1f1b" font-weight="700">Skriv inn tekst</text>
+
+  <rect x="460" y="120" width="280" height="120" rx="14" fill="#005850"/>
+  <text x="600" y="188" font-family="Segoe UI, Arial, sans-serif" font-size="32" text-anchor="middle" fill="#e9fffb" font-weight="700">Generer QR</text>
+
+  <rect x="860" y="120" width="280" height="120" rx="14" fill="#cfd2d3"/>
+  <text x="1000" y="188" font-family="Segoe UI, Arial, sans-serif" font-size="32" text-anchor="middle" fill="#0f1615" font-weight="700">Lagre fil</text>
+
+  <line x1="340" y1="180" x2="450" y2="180" stroke="#005850" stroke-width="8" marker-end="url(#pil)"/>
+  <line x1="740" y1="180" x2="850" y2="180" stroke="#005850" stroke-width="8" marker-end="url(#pil)"/>
+</svg>

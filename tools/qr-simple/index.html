@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>QR-kode Generator</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+  <style>
+    :root {
+      --brand-green: #009d4f;
+      --brand-deep-green: #005850;
+      --brand-light: #cfd2d3;
+      --bg-1: #e8f4ee;
+      --bg-2: #cfd2d3;
+      --panel: rgba(255, 255, 255, 0.9);
+      --text: #12332f;
+      --muted: #35514d;
+      --accent: #009d4f;
+      --accent-2: #005850;
+      --border: #a9b5b4;
+      --danger: #8b2020;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Segoe UI", "Calibri", "Trebuchet MS", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 18% 16%, rgba(0, 157, 79, 0.22) 0 20%, transparent 36%),
+        radial-gradient(circle at 82% 8%, rgba(0, 88, 80, 0.22) 0 18%, transparent 34%),
+        linear-gradient(135deg, var(--bg-1), var(--bg-2));
+      display: grid;
+      place-items: center;
+      padding: 18px;
+    }
+
+    .card {
+      width: min(780px, 100%);
+      background: var(--panel);
+      backdrop-filter: blur(8px);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      box-shadow: 0 18px 42px rgba(0, 88, 80, 0.18);
+      padding: 22px;
+      animation: pop-in 420ms ease-out;
+    }
+
+    @keyframes pop-in {
+      from {
+        opacity: 0;
+        transform: translateY(10px) scale(0.98);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    h1 {
+      margin: 0 0 14px;
+      font-size: clamp(1.3rem, 2.6vw, 1.9rem);
+      letter-spacing: 0.02em;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 280px;
+      gap: 16px;
+    }
+
+    .controls {
+      display: grid;
+      gap: 12px;
+    }
+
+    label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    input[type="text"],
+    select,
+    button,
+    input[type="file"] {
+      width: 100%;
+      font: inherit;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      padding: 10px 12px;
+      background: #fff;
+      color: var(--text);
+    }
+
+    input[type="text"]:focus,
+    select:focus,
+    input[type="file"]:focus,
+    button:focus {
+      outline: 2px solid rgba(0, 157, 79, 0.55);
+      outline-offset: 1px;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .row .field {
+      display: grid;
+      gap: 6px;
+    }
+
+    input[type="color"] {
+      width: 100%;
+      height: 44px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: #fff;
+      padding: 4px;
+      cursor: pointer;
+    }
+
+    .buttons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 4px;
+    }
+
+    button {
+      cursor: pointer;
+      transition: transform 120ms ease, background-color 120ms ease;
+      font-weight: 700;
+    }
+
+    #generateBtn {
+      background: var(--accent);
+      color: #fff;
+      border-color: transparent;
+    }
+
+    #generateBtn:hover {
+      background: var(--accent-2);
+      transform: translateY(-1px);
+    }
+
+    #saveBtn:hover {
+      background: #f8f6f2;
+      transform: translateY(-1px);
+    }
+
+    #saveBtn[disabled] {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .preview-wrap {
+      border: 1px dashed #7da49e;
+      border-radius: 12px;
+      background: #f9fbfa;
+      min-height: 280px;
+      display: grid;
+      place-items: center;
+      padding: 12px;
+    }
+
+    #preview {
+      width: min(250px, 100%);
+      aspect-ratio: 1;
+      object-fit: contain;
+      image-rendering: pixelated;
+      display: none;
+      border-radius: 8px;
+    }
+
+    .placeholder {
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.95rem;
+      line-height: 1.4;
+    }
+
+    .hint {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+
+    .status {
+      margin-top: 8px;
+      min-height: 1.2em;
+      font-size: 0.92rem;
+      color: var(--muted);
+    }
+
+    .status.error {
+      color: var(--danger);
+      font-weight: 600;
+    }
+
+    @media (max-width: 760px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .preview-wrap {
+        min-height: 220px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <h1>QR-kode Generator</h1>
+
+    <div class="grid">
+      <section class="controls">
+        <div>
+          <label for="urlInput">Skriv inn lenke eller tekst</label>
+          <input id="urlInput" type="text" placeholder="https://eksempel.no" />
+        </div>
+
+        <div class="row">
+          <div class="field">
+            <label for="fgColor">Forgrunnsfarge</label>
+            <input id="fgColor" type="color" value="#000000" />
+          </div>
+          <div class="field">
+            <label for="bgColor">Bakgrunnsfarge</label>
+            <input id="bgColor" type="color" value="#ffffff" />
+          </div>
+        </div>
+
+        <div>
+          <label for="logoInput">Logo (valgfritt)</label>
+          <input id="logoInput" type="file" accept="image/png,image/jpeg,image/jpg,image/gif,image/webp" />
+          <p class="hint">Tips: Bruk PNG med gjennomsiktighet for best resultat.</p>
+        </div>
+
+        <div>
+          <label for="formatSelect">Lagre som</label>
+          <select id="formatSelect">
+            <option value="png">PNG</option>
+            <option value="jpg">JPG</option>
+            <option value="svg">SVG</option>
+          </select>
+        </div>
+
+        <div class="buttons">
+          <button id="generateBtn" type="button">Generer QR-kode</button>
+          <button id="saveBtn" type="button" disabled>Lagre QR-kode</button>
+        </div>
+
+        <p id="status" class="status" aria-live="polite"></p>
+      </section>
+
+      <section class="preview-wrap">
+        <img id="preview" alt="Forhåndsvisning av QR-kode" />
+        <div id="placeholder" class="placeholder">Forhåndsvisning vises her</div>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    const urlInput = document.getElementById("urlInput");
+    const fgColor = document.getElementById("fgColor");
+    const bgColor = document.getElementById("bgColor");
+    const logoInput = document.getElementById("logoInput");
+    const formatSelect = document.getElementById("formatSelect");
+    const generateBtn = document.getElementById("generateBtn");
+    const saveBtn = document.getElementById("saveBtn");
+    const preview = document.getElementById("preview");
+    const placeholder = document.getElementById("placeholder");
+    const statusEl = document.getElementById("status");
+
+    const drawSize = 1000;
+    const marginModules = 4;
+
+    let qrMatrix = null;
+    let qrModuleCount = 0;
+    let logoImage = null;
+    let logoDataUrl = "";
+
+    function setStatus(message, isError = false) {
+      statusEl.textContent = message;
+      statusEl.classList.toggle("error", isError);
+    }
+
+    function toRgb(hexColor) {
+      const hex = hexColor.replace("#", "");
+      const normalized = hex.length === 3
+        ? hex.split("").map((v) => v + v).join("")
+        : hex;
+      const num = parseInt(normalized, 16);
+      return {
+        r: (num >> 16) & 255,
+        g: (num >> 8) & 255,
+        b: num & 255
+      };
+    }
+
+    function buildMatrix(qrObj) {
+      qrModuleCount = qrObj.getModuleCount();
+      qrMatrix = [];
+      for (let row = 0; row < qrModuleCount; row += 1) {
+        const line = [];
+        for (let col = 0; col < qrModuleCount; col += 1) {
+          line.push(qrObj.isDark(row, col));
+        }
+        qrMatrix.push(line);
+      }
+    }
+
+    function drawQrToCanvas(mimeType = "image/png") {
+      if (!qrMatrix) {
+        throw new Error("Generer en QR-kode først.");
+      }
+
+      const canvas = document.createElement("canvas");
+      canvas.width = drawSize;
+      canvas.height = drawSize;
+      const ctx = canvas.getContext("2d");
+
+      const moduleSize = drawSize / (qrModuleCount + marginModules * 2);
+      const qrStart = marginModules * moduleSize;
+
+      ctx.fillStyle = bgColor.value;
+      ctx.fillRect(0, 0, drawSize, drawSize);
+
+      ctx.fillStyle = fgColor.value;
+      for (let row = 0; row < qrModuleCount; row += 1) {
+        for (let col = 0; col < qrModuleCount; col += 1) {
+          if (qrMatrix[row][col]) {
+            ctx.fillRect(
+              Math.round(qrStart + col * moduleSize),
+              Math.round(qrStart + row * moduleSize),
+              Math.ceil(moduleSize),
+              Math.ceil(moduleSize)
+            );
+          }
+        }
+      }
+
+      if (logoImage) {
+        const logoSize = Math.floor(drawSize * 0.2);
+        const logoX = Math.floor((drawSize - logoSize) / 2);
+        const logoY = Math.floor((drawSize - logoSize) / 2);
+
+        ctx.fillStyle = bgColor.value;
+        ctx.fillRect(logoX - 8, logoY - 8, logoSize + 16, logoSize + 16);
+        ctx.drawImage(logoImage, logoX, logoY, logoSize, logoSize);
+      }
+
+      if (mimeType === "image/jpeg") {
+        const rgb = toRgb(bgColor.value);
+        const bgCanvas = document.createElement("canvas");
+        bgCanvas.width = drawSize;
+        bgCanvas.height = drawSize;
+        const bgCtx = bgCanvas.getContext("2d");
+        bgCtx.fillStyle = `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
+        bgCtx.fillRect(0, 0, drawSize, drawSize);
+        bgCtx.drawImage(canvas, 0, 0);
+        return bgCanvas;
+      }
+
+      return canvas;
+    }
+
+    function buildSvg() {
+      if (!qrMatrix) {
+        throw new Error("Generer en QR-kode først.");
+      }
+
+      const moduleSize = 10;
+      const margin = marginModules * moduleSize;
+      const size = (qrModuleCount * moduleSize) + margin * 2;
+
+      const parts = [];
+      parts.push("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+      parts.push(`<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"${size}\" height=\"${size}\" viewBox=\"0 0 ${size} ${size}\">`);
+      parts.push(`<rect width=\"100%\" height=\"100%\" fill=\"${bgColor.value}\"/>`);
+
+      for (let row = 0; row < qrModuleCount; row += 1) {
+        for (let col = 0; col < qrModuleCount; col += 1) {
+          if (qrMatrix[row][col]) {
+            const x = margin + col * moduleSize;
+            const y = margin + row * moduleSize;
+            parts.push(`<rect x=\"${x}\" y=\"${y}\" width=\"${moduleSize}\" height=\"${moduleSize}\" fill=\"${fgColor.value}\"/>`);
+          }
+        }
+      }
+
+      if (logoDataUrl) {
+        const logoSize = Math.floor(size * 0.2);
+        const logoX = Math.floor((size - logoSize) / 2);
+        const logoY = Math.floor((size - logoSize) / 2);
+        const pad = 8;
+        parts.push(`<rect x=\"${logoX - pad}\" y=\"${logoY - pad}\" width=\"${logoSize + pad * 2}\" height=\"${logoSize + pad * 2}\" fill=\"${bgColor.value}\"/>`);
+        parts.push(`<image href=\"${logoDataUrl}\" x=\"${logoX}\" y=\"${logoY}\" width=\"${logoSize}\" height=\"${logoSize}\"/>`);
+      }
+
+      parts.push("</svg>");
+      return parts.join("");
+    }
+
+    function downloadBlob(blob, filename) {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    function parseFilenameBase(input) {
+      const trimmed = input.trim();
+      if (!trimmed) {
+        return "qrkode";
+      }
+      const clean = trimmed
+        .replace(/^https?:\/\//i, "")
+        .replace(/[^a-zA-Z0-9._-]+/g, "-")
+        .replace(/-+/g, "-")
+        .replace(/^-|-$/g, "")
+        .slice(0, 60);
+      return clean || "qrkode";
+    }
+
+    logoInput.addEventListener("change", () => {
+      const file = logoInput.files && logoInput.files[0];
+      if (!file) {
+        logoImage = null;
+        logoDataUrl = "";
+        setStatus("Logo fjernet.");
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = () => {
+        const img = new Image();
+        img.onload = () => {
+          logoImage = img;
+          logoDataUrl = String(reader.result || "");
+          setStatus("Logo lastet inn.");
+        };
+        img.onerror = () => {
+          logoImage = null;
+          logoDataUrl = "";
+          setStatus("Kunne ikke lese logo-filen.", true);
+        };
+        img.src = String(reader.result || "");
+      };
+      reader.onerror = () => {
+        logoImage = null;
+        logoDataUrl = "";
+        setStatus("Kunne ikke lese logo-filen.", true);
+      };
+      reader.readAsDataURL(file);
+    });
+
+    generateBtn.addEventListener("click", () => {
+      const text = urlInput.value.trim();
+      if (!text) {
+        setStatus("Skriv inn en lenke eller tekst først.", true);
+        return;
+      }
+
+      if (typeof qrcode !== "function") {
+        setStatus("QR-biblioteket ble ikke lastet. Sjekk nett-tilgang.", true);
+        return;
+      }
+
+      try {
+        const qr = qrcode(0, "H");
+        qr.addData(text);
+        qr.make();
+        buildMatrix(qr);
+
+        const canvas = drawQrToCanvas("image/png");
+        preview.src = canvas.toDataURL("image/png");
+        preview.style.display = "block";
+        placeholder.style.display = "none";
+
+        saveBtn.disabled = false;
+        setStatus("QR-kode generert.");
+      } catch (err) {
+        setStatus(`Kunne ikke generere QR-kode: ${err.message}`, true);
+      }
+    });
+
+    saveBtn.addEventListener("click", () => {
+      if (!qrMatrix) {
+        setStatus("Generer en QR-kode først.", true);
+        return;
+      }
+
+      const ext = formatSelect.value;
+      const base = parseFilenameBase(urlInput.value);
+
+      try {
+        if (ext === "svg") {
+          const svg = buildSvg();
+          const blob = new Blob([svg], { type: "image/svg+xml;charset=utf-8" });
+          downloadBlob(blob, `${base}.svg`);
+          setStatus("Lagret som SVG.");
+          return;
+        }
+
+        const mime = ext === "jpg" ? "image/jpeg" : "image/png";
+        const canvas = drawQrToCanvas(mime);
+        canvas.toBlob((blob) => {
+          if (!blob) {
+            setStatus("Kunne ikke lagre filen.", true);
+            return;
+          }
+          downloadBlob(blob, `${base}.${ext}`);
+          setStatus(`Lagret som ${ext.toUpperCase()}.`);
+        }, mime, 0.95);
+      } catch (err) {
+        setStatus(`Kunne ikke lagre fil: ${err.message}`, true);
+      }
+    });
+  </script>
+</body>
+</html>

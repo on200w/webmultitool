@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Innholdsverktøy</title>
+  <style>
+    :root {
+      --brand-green: #009d4f;
+      --brand-deep-green: #005850;
+      --brand-light: #cfd2d3;
+      --surface: rgba(255, 255, 255, 0.94);
+      --text: #12332f;
+      --muted: #385552;
+      --border: #afbbbb;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Segoe UI", Calibri, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 16% 14%, rgba(0, 157, 79, 0.2) 0 22%, transparent 40%),
+        radial-gradient(circle at 86% 12%, rgba(0, 88, 80, 0.22) 0 18%, transparent 35%),
+        linear-gradient(140deg, #edf6f1, #cfd2d3);
+      padding: 26px;
+    }
+    .wrap { width: min(980px, 100%); margin: 0 auto; }
+    h1 { margin: 0; font-size: clamp(1.6rem, 3.8vw, 2.5rem); letter-spacing: 0.02em; }
+    .intro { margin: 10px 0 24px; color: var(--muted); font-size: 1.03rem; max-width: 70ch; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+    .card {
+      display: grid;
+      gap: 10px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 16px;
+      box-shadow: 0 10px 28px rgba(0, 88, 80, 0.14);
+      text-decoration: none;
+      color: inherit;
+      transition: transform 130ms ease, box-shadow 130ms ease;
+    }
+    .card:hover { transform: translateY(-3px); box-shadow: 0 16px 30px rgba(0, 88, 80, 0.2); }
+    .tag {
+      width: fit-content;
+      background: var(--brand-light);
+      color: #0c2e2a;
+      border-radius: 999px;
+      padding: 4px 10px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+    .title { font-size: 1.2rem; font-weight: 700; }
+    .desc { color: var(--muted); line-height: 1.45; font-size: 0.95rem; }
+    .go { color: var(--brand-deep-green); font-weight: 700; font-size: 0.93rem; }
+    .back { display: inline-block; margin-top: 24px; color: var(--brand-deep-green); font-weight: 700; text-decoration: none; }
+    .back:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <h1>Innholdsverktøy</h1>
+    <p class="intro">Verktøy for plakater, infoskjermer og informasjonsvideoer.</p>
+
+    <section class="grid">
+      <a class="card" href="../plakat/index.html">
+        <span class="tag">PLAKAT</span>
+        <div class="title">Plakatgenerator</div>
+        <p class="desc">Lag enkle plakater med tittel, tekst og kontaktfelt. Last ned som PNG.</p>
+        <span class="go">Åpne verktøy</span>
+      </a>
+
+      <a class="card" href="../infoskjerm/index.html">
+        <span class="tag">SKJERM</span>
+        <div class="title">Infoskjerm-planlegger</div>
+        <p class="desc">Bygg en spilleliste med slides og forhåndsvis den i automatisk loop.</p>
+        <span class="go">Åpne verktøy</span>
+      </a>
+
+      <a class="card" href="../video/index.html">
+        <span class="tag">VIDEO</span>
+        <div class="title">Videomanus-kort</div>
+        <p class="desc">Lag scene-for-scene manus med tidsestimat og eksporter til tekstfil.</p>
+        <span class="go">Åpne verktøy</span>
+      </a>
+    </section>
+
+    <a class="back" href="../../index.html">Tilbake til hovedmeny</a>
+  </main>
+</body>
+</html>

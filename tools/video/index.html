@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Videomanus-kort</title>
+  <style>
+    :root {
+      --brand-green: #009d4f;
+      --brand-deep-green: #005850;
+      --brand-light: #cfd2d3;
+      --surface: rgba(255, 255, 255, 0.94);
+      --text: #12332f;
+      --muted: #385552;
+      --border: #afbbbb;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Segoe UI", Calibri, sans-serif;
+      color: var(--text);
+      background: linear-gradient(140deg, #edf6f1, #cfd2d3);
+      padding: 20px;
+    }
+    .wrap { width: min(1200px, 100%); margin: 0 auto; }
+    h1 { margin: 0 0 12px; }
+    .layout { display: grid; grid-template-columns: 380px 1fr; gap: 16px; }
+    .panel, .listbox {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px;
+    }
+    .panel { display: grid; gap: 10px; align-content: start; }
+    label { display: block; font-weight: 600; margin-bottom: 4px; }
+    input[type="text"], textarea, input[type="number"], button {
+      width: 100%;
+      font: inherit;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 9px 10px;
+      background: #fff;
+      color: var(--text);
+    }
+    textarea { min-height: 90px; resize: vertical; }
+    .btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    button { cursor: pointer; font-weight: 700; }
+    #addBtn, #exportBtn { background: var(--brand-green); color: #fff; border-color: transparent; }
+    #clearBtn, #downloadBtn { background: var(--brand-deep-green); color: #fff; border-color: transparent; }
+    table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 10px; overflow: hidden; }
+    th, td { text-align: left; padding: 9px; border-bottom: 1px solid #e2e8e7; vertical-align: top; }
+    th { background: #eef4f3; }
+    tr:last-child td { border-bottom: none; }
+    .meta { color: var(--muted); font-size: 0.92rem; margin: 8px 0 0; }
+    .output { min-height: 150px; }
+    .back { display: inline-block; margin-top: 10px; color: var(--brand-deep-green); font-weight: 700; text-decoration: none; }
+    .back:hover { text-decoration: underline; }
+    @media (max-width: 980px) { .layout { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <h1>Videomanus-kort</h1>
+    <div class="layout">
+      <section class="panel">
+        <div>
+          <label for="scene">Scene</label>
+          <input id="scene" type="text" placeholder="F.eks. Intro med logo" />
+        </div>
+        <div>
+          <label for="onscreen">Tekst på skjerm</label>
+          <textarea id="onscreen" placeholder="Kort tekst som vises i videoen"></textarea>
+        </div>
+        <div>
+          <label for="voice">Voiceover</label>
+          <textarea id="voice" placeholder="Opplesning/manus"></textarea>
+        </div>
+        <div>
+          <label for="seconds">Varighet (sekunder)</label>
+          <input id="seconds" type="number" min="1" max="600" value="6" />
+        </div>
+        <div class="btns">
+          <button id="addBtn" type="button">Legg til kort</button>
+          <button id="clearBtn" type="button">Tøm alt</button>
+        </div>
+        <div class="btns">
+          <button id="exportBtn" type="button">Lag tekstutkast</button>
+          <button id="downloadBtn" type="button">Last ned .txt</button>
+        </div>
+        <textarea id="output" class="output" placeholder="Eksportert manus vises her"></textarea>
+        <a class="back" href="../innhold/index.html">Tilbake til innholdsmeny</a>
+      </section>
+
+      <section class="listbox">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Scene</th>
+              <th>Varighet</th>
+              <th>Innhold</th>
+            </tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
+        <p class="meta" id="meta">Ingen kort lagt til.</p>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    const sceneEl = document.getElementById("scene");
+    const onscreenEl = document.getElementById("onscreen");
+    const voiceEl = document.getElementById("voice");
+    const secondsEl = document.getElementById("seconds");
+    const tbody = document.getElementById("tbody");
+    const meta = document.getElementById("meta");
+    const output = document.getElementById("output");
+
+    const addBtn = document.getElementById("addBtn");
+    const clearBtn = document.getElementById("clearBtn");
+    const exportBtn = document.getElementById("exportBtn");
+    const downloadBtn = document.getElementById("downloadBtn");
+
+    let cards = [];
+
+    function renderTable() {
+      tbody.innerHTML = "";
+      if (cards.length === 0) {
+        meta.textContent = "Ingen kort lagt til.";
+        return;
+      }
+
+      let totalSeconds = 0;
+      cards.forEach((card, index) => {
+        totalSeconds += card.seconds;
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${index + 1}</td>
+          <td><strong>${card.scene}</strong></td>
+          <td>${card.seconds}s</td>
+          <td><div><strong>Skjerm:</strong> ${card.onscreen}</div><div><strong>Voice:</strong> ${card.voice}</div></td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      const minutes = (totalSeconds / 60).toFixed(1);
+      meta.textContent = `Totalt ${cards.length} kort • ${totalSeconds} sek (${minutes} min)`;
+    }
+
+    function buildScriptText() {
+      if (cards.length === 0) {
+        return "Ingen kort er lagt til.";
+      }
+      const lines = [];
+      lines.push("VIDEOMANUS");
+      lines.push("");
+      cards.forEach((card, i) => {
+        lines.push(`${i + 1}. Scene: ${card.scene}`);
+        lines.push(`   Varighet: ${card.seconds} sek`);
+        lines.push(`   Skjermtekst: ${card.onscreen}`);
+        lines.push(`   Voiceover: ${card.voice}`);
+        lines.push("");
+      });
+      return lines.join("\n");
+    }
+
+    function downloadTextFile(content) {
+      const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "videomanus.txt";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    addBtn.addEventListener("click", () => {
+      const scene = sceneEl.value.trim();
+      const onscreen = onscreenEl.value.trim();
+      const voice = voiceEl.value.trim();
+      const seconds = Math.max(1, Number.parseInt(secondsEl.value, 10) || 6);
+
+      if (!scene || !onscreen || !voice) {
+        meta.textContent = "Fyll ut scene, skjermtekst og voiceover.";
+        return;
+      }
+
+      cards.push({ scene, onscreen, voice, seconds });
+      sceneEl.value = "";
+      onscreenEl.value = "";
+      voiceEl.value = "";
+      secondsEl.value = String(seconds);
+      renderTable();
+    });
+
+    clearBtn.addEventListener("click", () => {
+      cards = [];
+      output.value = "";
+      renderTable();
+    });
+
+    exportBtn.addEventListener("click", () => {
+      output.value = buildScriptText();
+    });
+
+    downloadBtn.addEventListener("click", () => {
+      const content = output.value.trim() ? output.value : buildScriptText();
+      downloadTextFile(content);
+    });
+
+    renderTable();
+  </script>
+</body>
+</html>
