@@ -440,9 +440,6 @@
         const logoSize = Math.floor(pixelSize * 0.2);
         const logoX = Math.floor((pixelSize - logoSize) / 2);
         const logoY = Math.floor((pixelSize - logoSize) / 2);
-
-        ctx.fillStyle = bgColor.value;
-        ctx.fillRect(logoX - 8, logoY - 8, logoSize + 16, logoSize + 16);
         ctx.drawImage(logoImage, logoX, logoY, logoSize, logoSize);
       }
 
@@ -490,8 +487,6 @@
         const logoSize = Math.floor(size * 0.2);
         const logoX = Math.floor((size - logoSize) / 2);
         const logoY = Math.floor((size - logoSize) / 2);
-        const pad = 8;
-        parts.push(`<rect x=\"${logoX - pad}\" y=\"${logoY - pad}\" width=\"${logoSize + pad * 2}\" height=\"${logoSize + pad * 2}\" fill=\"${bgColor.value}\"/>`);
         parts.push(`<image href=\"${logoDataUrl}\" x=\"${logoX}\" y=\"${logoY}\" width=\"${logoSize}\" height=\"${logoSize}\"/>`);
       }
 
