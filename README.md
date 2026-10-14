@@ -12,14 +12,14 @@ source/
     qr/index.html           Undermeny: velg mellom enkel og utvidet QR-generator
     qr-simple/index.html    QR-kode generator (enkel)
     qr-plus/index.html      QR-kode generator (utvidet)
-    innhold/index.html      Undermeny: plakat, infoskjerm og video
+    innhold/index.html      Undermeny: plakat, infoskjerm, video og fotoark
     plakat/index.html       Plakatgenerator
     infoskjerm/index.html   Infoskjerm-planlegger
     video/index.html        Videomanus-kort
+    fotoark/index.html      Fotoark for utskrift av flere bilder per side
     fargepalett/index.html  Fargepalett-verktøy
     tekstteller/index.html  Tekst-/ord-teller
     strekkode/index.html    Strekkode-generator
-    fotoark/index.html      Fotoark for utskrift av flere bilder per side
 ```
 
 ## Verktøy
