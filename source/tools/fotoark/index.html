@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fotoark</title>
+  <style id="printPageStyle"></style>
+  <style>
+    :root {
+      --brand-green: #009d4f;
+      --brand-deep-green: #005850;
+      --brand-light: #cfd2d3;
+      --surface: rgba(255, 255, 255, 0.94);
+      --text: #12332f;
+      --muted: #385552;
+      --border: #afbbbb;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      padding: 20px;
+      color: var(--text);
+      background: linear-gradient(140deg, #edf6f1, #cfd2d3);
+      font-family: "Segoe UI", Calibri, sans-serif;
+    }
+    .wrap { width: min(1200px, 100%); margin: 0 auto; }
+    h1 { margin: 0 0 6px; }
+    .intro { margin: 0 0 18px; color: var(--muted); }
+    .layout { display: grid; grid-template-columns: minmax(280px, 360px) minmax(0, 1fr); gap: 16px; align-items: start; }
+    .panel, .preview {
+      min-width: 0;
+      padding: 14px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+    }
+    .panel { display: grid; gap: 12px; }
+    label { display: block; margin-bottom: 4px; font-weight: 600; }
+    input, select, button {
+      width: 100%;
+      min-height: 40px;
+      padding: 8px 10px;
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      background: #fff;
+      color: var(--text);
+      font: inherit;
+    }
+    button { cursor: pointer; font-weight: 700; }
+    button:hover:not(:disabled) { border-color: var(--brand-deep-green); }
+    button:disabled { cursor: not-allowed; opacity: 0.55; }
+    .dropzone {
+      display: grid;
+      min-height: 116px;
+      place-content: center;
+      gap: 5px;
+      padding: 18px;
+      border: 2px dashed #7da49e;
+      border-radius: 12px;
+      background: #f3f8f5;
+      text-align: center;
+      cursor: pointer;
+    }
+    .dropzone strong { color: var(--brand-deep-green); }
+    .dropzone small, .meta { color: var(--muted); }
+    .dropzone.dragover { border-color: var(--brand-green); background: #e1f2e9; }
+    .file-input { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); }
+    .two, .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .checks { display: grid; gap: 8px; }
+    .check { display: flex; align-items: center; gap: 8px; font-weight: 500; }
+    .check input { width: 17px; min-height: 17px; height: 17px; margin: 0; accent-color: var(--brand-green); }
+    .actions { grid-template-columns: 1fr 1fr; }
+    #printBtn { background: var(--brand-green); color: #fff; border-color: transparent; }
+    #clearBtn { background: #fff; }
+    .photo-list { display: grid; gap: 6px; max-height: 220px; overflow: auto; padding: 0; margin: 0; list-style: none; }
+    .photo-item { display: grid; grid-template-columns: minmax(0, 1fr) auto auto auto; gap: 4px; align-items: center; }
+    .photo-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.88rem; }
+    .photo-item button { width: 34px; min-height: 32px; height: 32px; padding: 2px; }
+    .meta { margin: 0; font-size: 0.9rem; }
+    .preview-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 10px; }
+    .preview-head h2 { margin: 0; font-size: 1.1rem; }
+    #pageCount { color: var(--muted); font-size: 0.9rem; }
+    .canvas-wrap { max-height: 75vh; overflow-y: auto; padding: 14px; border-radius: 10px; background: #e8eeeb; }
+    #printArea { display: grid; justify-items: center; gap: 16px; }
+    .print-sheet { max-width: 100%; height: auto !important; overflow: hidden; background: #fff; box-shadow: 0 3px 14px rgba(18, 51, 47, 0.2); }
+    .print-sheet canvas { display: block; width: 100%; height: auto; }
+    .back { display: inline-block; margin-top: 14px; color: var(--brand-deep-green); font-weight: 700; text-decoration: none; }
+    .back:hover { text-decoration: underline; }
+    @media (max-width: 850px) { .layout { grid-template-columns: 1fr; } }
+    @media (max-width: 520px) {
+      body { padding: 12px; }
+      .preview-head { align-items: flex-start; flex-direction: column; }
+      .canvas-wrap { max-height: 70vh; padding: 8px; }
+    }
+    @media print {
+      @page { margin: 0; }
+      body { margin: 0; padding: 0; background: #fff; }
+      body > main { width: auto; max-width: none; margin: 0; }
+      body > main > h1, body > main > .intro, .panel, .preview-head { display: none !important; }
+      .layout { display: block; }
+      .preview { padding: 0; border: 0; background: #fff; }
+      .canvas-wrap { max-height: none; overflow: visible; padding: 0; background: #fff; }
+      #printArea { display: block; }
+      .print-sheet { max-width: none; height: auto !important; break-after: page; page-break-after: always; margin: 0; padding: 0; overflow: hidden; box-shadow: none; }
+      .print-sheet:last-child { break-after: auto; page-break-after: auto; }
+      .print-sheet canvas { display: block; width: 100%; height: auto; }
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <h1>Fotoark</h1>
+    <p class="intro">Sett flere bilder på utskriftsark. Alt behandles lokalt i nettleseren.</p>
+    <div class="layout">
+      <section class="panel" aria-label="Innstillinger for fotoark">
+        <label class="dropzone" id="dropzone" for="photoInput">
+          <strong>Velg bilder eller dra dem hit</strong>
+          <small>Du kan også lime inn et kopiert bilde med Ctrl+V</small>
+        </label>
+        <input class="file-input" id="photoInput" type="file" accept="image/*" multiple />
+        <input class="file-input" id="cameraInput" type="file" accept="image/*" capture="environment" />
+        <div class="two">
+          <button type="button" id="cameraBtn">Ta bilde</button>
+          <button type="button" id="pasteBtn">Lim inn bilde</button>
+        </div>
+        <div>
+          <label for="paperSize">Papirformat</label>
+          <select id="paperSize">
+            <option value="a4">A4 (210 x 297 mm)</option>
+            <option value="a3">A3 (297 x 420 mm)</option>
+            <option value="a5">A5 (148 x 210 mm)</option>
+            <option value="letter">Letter (8,5 x 11 in)</option>
+            <option value="legal">Legal (8,5 x 14 in)</option>
+            <option value="4x6">Foto 4 x 6 in</option>
+            <option value="5x7">Foto 5 x 7 in</option>
+          </select>
+        </div>
+        <div class="two">
+          <div>
+            <label for="photosPerPage">Bilder per side</label>
+            <select id="photosPerPage">
+              <option>1</option><option>2</option><option selected>4</option><option>6</option>
+              <option>8</option><option>9</option><option>12</option><option>16</option>
+            </select>
+          </div>
+          <div>
+            <label for="orientation">Retning</label>
+            <select id="orientation"><option value="portrait">Stående</option><option value="landscape">Liggende</option></select>
+          </div>
+        </div>
+        <div class="two">
+          <div>
+            <label for="fitMode">Tilpasning</label>
+            <select id="fitMode"><option value="contain">Vis hele bildet</option><option value="cover">Fyll ruten (beskjær)</option></select>
+          </div>
+          <div>
+            <label for="gapUnit">Avstandsenhet</label>
+            <select id="gapUnit"><option value="mm">Millimeter</option><option value="inch">Tommer</option></select>
+          </div>
+          <div>
+            <label for="gap" id="gapLabel">Avstand (mm)</label>
+            <input id="gap" type="number" min="0" max="50" step="0.5" value="4" />
+          </div>
+        </div>
+        <div class="checks">
+          <label class="check"><input id="whiteBorder" type="checkbox" checked /> Hvit kant rundt bildene</label>
+          <label class="check"><input id="autoRotate" type="checkbox" /> Roter bilder for best tilpasning</label>
+        </div>
+        <ul class="photo-list" id="photoList" aria-label="Valgte bilder"></ul>
+        <p class="meta" id="status">Ingen bilder valgt.</p>
+        <div class="actions">
+          <button type="button" id="printBtn" disabled>Skriv ut / Lagre PDF</button>
+          <button type="button" id="jpgBtn" disabled>Last ned side som JPG</button>
+          <button type="button" id="clearBtn" disabled>Fjern alle</button>
+        </div>
+        <a class="back" href="../../app/index.html">Tilbake til hovedmeny</a>
+      </section>
+      <section class="preview" aria-label="Forhåndsvisning">
+        <div class="preview-head">
+          <h2>Forhåndsvisning</h2>
+          <span id="pageCount">Ingen sider</span>
+        </div>
+        <div class="canvas-wrap" tabindex="0" role="region" aria-label="Rullbar forhåndsvisning av alle utskriftsark">
+          <div id="printArea"></div>
+        </div>
+      </section>
+    </div>
+  </main>
+  <script>
+    const paperFormats = {
+      a4: [210, 297], a3: [297, 420], a5: [148, 210],
+      letter: [215.9, 279.4], legal: [215.9, 355.6],
+      "4x6": [101.6, 152.4], "5x7": [127, 177.8]
+    };
+    const photoInput = document.getElementById("photoInput");
+    const cameraInput = document.getElementById("cameraInput");
+    const dropzone = document.getElementById("dropzone");
+    const photoList = document.getElementById("photoList");
+    const statusEl = document.getElementById("status");
+    const pageCountEl = document.getElementById("pageCount");
+    const printArea = document.getElementById("printArea");
+    const canvasWrap = document.querySelector(".canvas-wrap");
+    const controls = ["paperSize", "photosPerPage", "orientation", "fitMode", "gap", "gapUnit", "whiteBorder", "autoRotate"]
+      .map((id) => document.getElementById(id));
+    const printPageStyle = document.getElementById("printPageStyle");
+    let photos = [];
+    let pageCanvases = [];
+    let activePage = 0;
+    let previousGapUnit = "mm";
+    let pageObserver;
+
+    function selectedPageSize() {
+      const [shortSide, longSide] = paperFormats[document.getElementById("paperSize").value];
+      return document.getElementById("orientation").value === "portrait"
+        ? [shortSide, longSide]
+        : [longSide, shortSide];
+    }
+
+    function photoGrid(count, pageAspect) {
+      let best = { columns: 1, rows: count, score: Infinity };
+      for (let columns = 1; columns <= count; columns += 1) {
+        const rows = Math.ceil(count / columns);
+        const cellAspect = (pageAspect * rows) / columns;
+        const score = Math.abs(Math.log(cellAspect));
+        if (score < best.score) best = { columns, rows, score };
+      }
+      return best;
+    }
+
+    function drawPhoto(context, photo, x, y, width, height, fitMode, autoRotate, borderWidth) {
+      const sourceWidth = photo.image.naturalWidth;
+      const sourceHeight = photo.image.naturalHeight;
+      let rotate = false;
+      let fitWidth = sourceWidth;
+      let fitHeight = sourceHeight;
+      if (autoRotate) {
+        const normalFit = Math.abs(Math.log((sourceWidth / sourceHeight) / (width / height)));
+        const rotatedFit = Math.abs(Math.log((sourceHeight / sourceWidth) / (width / height)));
+        rotate = rotatedFit < normalFit;
+      }
+      if (rotate) [fitWidth, fitHeight] = [sourceHeight, sourceWidth];
+      const innerX = x + borderWidth;
+      const innerY = y + borderWidth;
+      const innerWidth = Math.max(1, width - borderWidth * 2);
+      const innerHeight = Math.max(1, height - borderWidth * 2);
+      const scale = fitMode === "cover"
+        ? Math.max(innerWidth / fitWidth, innerHeight / fitHeight)
+        : Math.min(innerWidth / fitWidth, innerHeight / fitHeight);
+      const drawWidth = sourceWidth * scale;
+      const drawHeight = sourceHeight * scale;
+      context.save();
+      context.beginPath();
+      context.rect(innerX, innerY, innerWidth, innerHeight);
+      context.clip();
+      if (rotate) {
+        context.translate(innerX + innerWidth / 2, innerY + innerHeight / 2);
+        context.rotate(Math.PI / 2);
+        context.drawImage(photo.image, -drawWidth / 2, -drawHeight / 2, drawWidth, drawHeight);
+      } else {
+        context.drawImage(photo.image, innerX + (innerWidth - drawWidth) / 2, innerY + (innerHeight - drawHeight) / 2, drawWidth, drawHeight);
+      }
+      context.restore();
+    }
+
+    function renderPage(pageIndex, outputDpi = 120) {
+      const [widthMm, heightMm] = selectedPageSize();
+      const pixelsPerMm = outputDpi / 25.4;
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.round(widthMm * pixelsPerMm);
+      canvas.height = Math.round(heightMm * pixelsPerMm);
+      const context = canvas.getContext("2d");
+      context.fillStyle = "#ffffff";
+      context.fillRect(0, 0, canvas.width, canvas.height);
+      const photosPerPage = Number(document.getElementById("photosPerPage").value);
+      const pagePhotos = photos.slice(pageIndex * photosPerPage, (pageIndex + 1) * photosPerPage);
+      const pageAspect = widthMm / heightMm;
+      const { columns, rows } = photoGrid(pagePhotos.length, pageAspect);
+      const gapValue = Number(document.getElementById("gap").value) || 0;
+      const gapMm = document.getElementById("gapUnit").value === "inch" ? gapValue * 25.4 : gapValue;
+      const gapPixels = Math.max(0, gapMm * pixelsPerMm);
+      const cellWidth = (canvas.width - gapPixels * (columns + 1)) / columns;
+      const cellHeight = (canvas.height - gapPixels * (rows + 1)) / rows;
+      const borderWidth = document.getElementById("whiteBorder").checked ? 2 * pixelsPerMm : 0;
+      pagePhotos.forEach((photo, index) => {
+        const column = index % columns;
+        const row = Math.floor(index / columns);
+        drawPhoto(context, photo,
+          gapPixels + column * (cellWidth + gapPixels),
+          gapPixels + row * (cellHeight + gapPixels),
+          cellWidth, cellHeight,
+          document.getElementById("fitMode").value,
+          document.getElementById("autoRotate").checked,
+          borderWidth);
+      });
+      return canvas;
+    }
+
+    function updatePreview() {
+      const count = pageCanvases.length;
+      pageObserver?.disconnect();
+      activePage = Math.min(activePage, Math.max(0, count - 1));
+      pageCountEl.textContent = count ? `Side ${activePage + 1} av ${count}` : "Ingen sider";
+      document.getElementById("printBtn").disabled = count === 0;
+      document.getElementById("jpgBtn").disabled = count === 0;
+      document.getElementById("clearBtn").disabled = count === 0;
+      if (!count) return;
+
+      pageObserver = new IntersectionObserver(() => {
+        const rootBounds = canvasWrap.getBoundingClientRect();
+        const visiblePages = Array.from(printArea.querySelectorAll(".print-sheet"))
+          .map((sheet) => {
+            const bounds = sheet.getBoundingClientRect();
+            const visibleHeight = Math.max(0, Math.min(bounds.bottom, rootBounds.bottom) - Math.max(bounds.top, rootBounds.top));
+            return { sheet, ratio: visibleHeight / bounds.height };
+          })
+          .filter((page) => page.ratio > 0)
+          .sort((first, second) => second.ratio - first.ratio);
+        if (!visiblePages.length) return;
+        activePage = Number(visiblePages[0].sheet.dataset.pageIndex);
+        pageCountEl.textContent = `Side ${activePage + 1} av ${count}`;
+      }, { root: canvasWrap, threshold: [0.25, 0.5, 0.75] });
+      printArea.querySelectorAll(".print-sheet").forEach((sheet) => pageObserver.observe(sheet));
+    }
+
+    function renderAll() {
+      const [printWidth, printHeight] = selectedPageSize();
+      printPageStyle.textContent = `@media print { @page { size: ${printWidth}mm ${printHeight}mm; margin: 0; } }`;
+      const photosPerPage = Number(document.getElementById("photosPerPage").value);
+      const pageTotal = Math.ceil(photos.length / photosPerPage);
+      pageCanvases = Array.from({ length: pageTotal }, (_, index) => renderPage(index));
+      printArea.replaceChildren(...pageCanvases.map((canvas, index) => {
+        const sheet = document.createElement("div");
+        const [widthMm, heightMm] = selectedPageSize();
+        sheet.className = "print-sheet";
+        sheet.style.width = `${widthMm}mm`;
+        sheet.style.height = `${heightMm}mm`;
+        sheet.style.aspectRatio = `${widthMm} / ${heightMm}`;
+        sheet.dataset.pageIndex = String(index);
+        sheet.setAttribute("role", "img");
+        sheet.setAttribute("aria-label", `Fotoark side ${index + 1}`);
+        sheet.append(canvas);
+        return sheet;
+      }));
+      canvasWrap.scrollTop = 0;
+      updatePreview();
+      const dimensions = selectedPageSize().map((value) => `${value.toFixed(0)} mm`).join(" x ");
+      statusEl.textContent = photos.length
+        ? `${photos.length} bilder · ${photosPerPage} per side · ${pageTotal} ${pageTotal === 1 ? "side" : "sider"} · ${dimensions}`
+        : "Ingen bilder valgt.";
+      document.getElementById("printBtn").disabled = photos.length === 0;
+      document.getElementById("jpgBtn").disabled = photos.length === 0;
+      document.getElementById("clearBtn").disabled = photos.length === 0;
+      renderPhotoList();
+    }
+
+    function renderPhotoList() {
+      photoList.replaceChildren(...photos.map((photo, index) => {
+        const item = document.createElement("li");
+        item.className = "photo-item";
+        const name = document.createElement("span");
+        name.className = "photo-name";
+        name.title = photo.name;
+        name.textContent = `${index + 1}. ${photo.name}`;
+        item.append(name);
+        [["↑", "Flytt opp", -1], ["↓", "Flytt ned", 1], ["×", "Fjern bilde", 0]].forEach(([label, title, change]) => {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.textContent = label;
+          button.title = title;
+          button.setAttribute("aria-label", `${title}: ${photo.name}`);
+          button.disabled = change < 0 ? index === 0 : change > 0 ? index === photos.length - 1 : false;
+          button.addEventListener("click", () => {
+            if (change === 0) {
+              URL.revokeObjectURL(photo.url);
+              photos.splice(index, 1);
+            } else {
+              const destination = index + change;
+              [photos[index], photos[destination]] = [photos[destination], photos[index]];
+            }
+            renderAll();
+          });
+          item.append(button);
+        });
+        return item;
+      }));
+    }
+
+    async function addFiles(fileList) {
+      const imageFiles = Array.from(fileList).filter((file) => file.type.startsWith("image/"));
+      const loaded = await Promise.all(imageFiles.map((file) => new Promise((resolve) => {
+        const image = new Image();
+        const url = URL.createObjectURL(file);
+        image.onload = () => resolve({ name: file.name || "Innlimt bilde", image, url });
+        image.onerror = () => { URL.revokeObjectURL(url); resolve(null); };
+        image.src = url;
+      })));
+      photos.push(...loaded.filter(Boolean));
+      renderAll();
+      if (imageFiles.length && !loaded.some(Boolean)) statusEl.textContent = "Kunne ikke åpne bildefilene.";
+    }
+
+    photoInput.addEventListener("change", () => {
+      addFiles(photoInput.files);
+      photoInput.value = "";
+    });
+    cameraInput.addEventListener("change", () => {
+      addFiles(cameraInput.files);
+      cameraInput.value = "";
+    });
+    document.getElementById("cameraBtn").addEventListener("click", () => cameraInput.click());
+    document.getElementById("pasteBtn").addEventListener("click", async () => {
+      try {
+        const items = await navigator.clipboard.read();
+        const files = [];
+        for (const item of items) {
+          const type = item.types.find((entry) => entry.startsWith("image/"));
+          if (type) files.push(new File([await item.getType(type)], `innlimt-${Date.now()}.${type.split("/")[1]}`, { type }));
+        }
+        if (files.length) addFiles(files);
+        else statusEl.textContent = "Fant ikke noe bilde i utklippstavlen.";
+      } catch {
+        statusEl.textContent = "Tillat tilgang til utklippstavlen, eller bruk Ctrl+V på siden.";
+      }
+    });
+    window.addEventListener("paste", (event) => {
+      const files = Array.from(event.clipboardData?.items || [])
+        .filter((item) => item.type.startsWith("image/"))
+        .map((item) => item.getAsFile())
+        .filter(Boolean);
+      if (files.length) addFiles(files);
+    });
+    ["dragenter", "dragover"].forEach((type) => dropzone.addEventListener(type, (event) => {
+      event.preventDefault();
+      dropzone.classList.add("dragover");
+    }));
+    ["dragleave", "drop"].forEach((type) => dropzone.addEventListener(type, (event) => {
+      event.preventDefault();
+      dropzone.classList.remove("dragover");
+      if (type === "drop") addFiles(event.dataTransfer.files);
+    }));
+    controls.forEach((control) => control.addEventListener("change", renderAll));
+    document.getElementById("printBtn").addEventListener("click", () => window.print());
+    document.getElementById("jpgBtn").addEventListener("click", () => {
+      pageCanvases[activePage].toBlob((blob) => {
+        if (!blob) return;
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = `fotoark-side-${activePage + 1}.jpg`;
+        link.click();
+        URL.revokeObjectURL(link.href);
+      }, "image/jpeg", 0.94);
+    });
+    document.getElementById("clearBtn").addEventListener("click", () => {
+      photos.forEach((photo) => URL.revokeObjectURL(photo.url));
+      photos = [];
+      activePage = 0;
+      renderAll();
+    });
+    document.getElementById("gapUnit").addEventListener("change", (event) => {
+      const gapInput = document.getElementById("gap");
+      const gapLabel = document.getElementById("gapLabel");
+      const gapInMillimeters = Number(gapInput.value) * (previousGapUnit === "inch" ? 25.4 : 1);
+      const converted = event.target.value === "inch" ? gapInMillimeters / 25.4 : gapInMillimeters;
+      gapInput.value = converted.toFixed(event.target.value === "inch" ? 3 : 1);
+      gapInput.step = event.target.value === "inch" ? "0.05" : "0.5";
+      gapInput.max = event.target.value === "inch" ? "2" : "50";
+      gapLabel.textContent = `Avstand (${event.target.value === "inch" ? "tommer" : "mm"})`;
+      previousGapUnit = event.target.value;
+      renderAll();
+    });
+    renderAll();
+  </script>
+</body>
+</html>

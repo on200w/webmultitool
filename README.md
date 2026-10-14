@@ -19,6 +19,7 @@ source/
     fargepalett/index.html  Fargepalett-verktøy
     tekstteller/index.html  Tekst-/ord-teller
     strekkode/index.html    Strekkode-generator
+    fotoark/index.html      Fotoark for utskrift av flere bilder per side
 ```
 
 ## Verktøy
@@ -33,6 +34,7 @@ source/
 | Fargepalett-verktøy | Lag nyanser og beslektede farger fra en basisfarge, sjekk WCAG-kontrast mellom to farger. |
 | Tekst-/ord-teller | Tell tegn, ord, setninger og avsnitt, og få et estimat på lesetid. |
 | Strekkode-generator | Lag strekkoder (CODE128, EAN, UPC, CODE39, ITF-14), last ned som PNG eller SVG. |
+| Fotoark | Sett flere bilder på A4, A3 eller fotopapir, forhåndsvis sidene og skriv ut eller lagre som PDF. |
 
 ### QR-kode generator (enkel)
 
@@ -78,6 +80,10 @@ Live-telling mens du skriver eller limer inn tekst: tegn (med og uten mellomrom)
 ### Strekkode-generator
 
 Genererer strekkoder i flere formater (CODE128, EAN-13, EAN-8, UPC-A, CODE39, ITF-14) med valgfri strek-/bakgrunnsfarge, bredde, høyde og synlig verditekst. Strekkoden kan lastes ned som PNG eller SVG.
+
+### Fotoark
+
+Legg flere bilder på utskriftsark i A4-, A3-, Letter-, Legal- eller fotopapirformat. Velg antall bilder per side, retning, tilpasning og avstand, og forhåndsvis sidene før utskrift eller lagring som PDF. Bildene behandles lokalt i nettleseren.
 
 ## Design
 
