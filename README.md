@@ -75,25 +75,37 @@ Bygger en spilleliste med informasjonsslides (tittel, tekst, varighet) som kan f
 
 Lager et scene-for-scene manus for en informasjonsvideo. Hver scene har tekst på skjerm, voiceover og varighet i sekunder. Manuset settes sammen til et lesbart tekstutkast som kan lastes ned som `.txt`.
 
+![Videomanus-kort med et eksempelmanus](source/images/video-manus.png)
+
 ### Fargepalett-verktøy
 
 Tar utgangspunkt i én basisfarge og genererer en skala av nyanser (lysere → mørkere) samt beslektede farger (komplementær, analoge og triade). Har også en egen kontrastsjekker som regner ut WCAG-kontrastforhold mellom to farger og viser om kombinasjonen består AA/AAA-kravene.
+
+![Fargepalett med nyanser, relaterte farger og kontrastsjekk](source/images/fargepalett.png)
 
 ### Tekst-/ord-teller
 
 Live-telling mens du skriver eller limer inn tekst: tegn (med og uten mellomrom), ord, setninger, avsnitt, snitt-ordlengde og et estimat på lesetid. Statistikken kan kopieres til utklippstavlen med ett klikk.
 
+![Tekstteller med eksempeltekst og statistikk](source/images/tekstteller.png)
+
 ### Strekkode-generator
 
 Genererer strekkoder i flere formater (CODE128, EAN-13, EAN-8, UPC-A, CODE39, ITF-14) med valgfri strek-/bakgrunnsfarge, bredde, høyde og synlig verditekst. Strekkoden kan lastes ned som PNG eller SVG.
+
+![Strekkodegenerator med generert kode](source/images/strekkode.png)
 
 ### Fotoark
 
 Legg flere bilder på utskriftsark i A4-, A3-, Letter-, Legal- eller fotopapirformat. Velg antall bilder per side, retning, tilpasning og avstand, og forhåndsvis sidene før utskrift eller lagring som PDF. Bildene behandles lokalt i nettleseren.
 
+![Fotoark med forhåndsvisning av utskriftsark](source/images/fotoark.png)
+
 ### Filkonvertering
 
 Bildeverktøyet konverterer flere filer samtidig til PNG, JPEG eller WebP. Inndataformat avhenger av hva nettleseren kan dekode; animerte bilder blir stillbilder. Videokonverteringen spiller av og tar opp videostrømmen på nytt, med kodekene nettleserens MediaRecorder støtter. Dette skjer i sanntid, og støtten for videoformater varierer mellom nettlesere og operativsystemer. Filer behandles lokalt.
+
+![Filkonvertering med valg for video og bilder](source/images/filkonvertering.png)
 
 ## Design
 
