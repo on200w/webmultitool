@@ -9,6 +9,9 @@ Verktoy - START HER.lnk    Snarvei med eget ikon som åpner source/app/index.htm
 source/
   app/index.html           Hovedmeny med lenker til alle verktøy/kategorier
   tools/
+    konvertering/index.html Konverteringsmeny for video og bilder
+    konvertering/video.html Videokonvertering med nettleserens MediaRecorder
+    konvertering/bilder.html Batch-konvertering av bilder til PNG, JPEG eller WebP
     qr/index.html           Undermeny: velg mellom enkel og utvidet QR-generator
     qr-simple/index.html    QR-kode generator (enkel)
     qr-plus/index.html      QR-kode generator (utvidet)
@@ -35,6 +38,7 @@ source/
 | Tekst-/ord-teller | Tell tegn, ord, setninger og avsnitt, og få et estimat på lesetid. |
 | Strekkode-generator | Lag strekkoder (CODE128, EAN, UPC, CODE39, ITF-14), last ned som PNG eller SVG. |
 | Fotoark | Sett flere bilder på A4, A3 eller fotopapir, forhåndsvis sidene og skriv ut eller lagre som PDF. |
+| Filkonvertering | Konverter bilder til PNG/JPEG/WebP og video til nettleserens tilgjengelige MediaRecorder-formater. |
 
 ### QR-kode generator (enkel)
 
@@ -84,6 +88,10 @@ Genererer strekkoder i flere formater (CODE128, EAN-13, EAN-8, UPC-A, CODE39, IT
 ### Fotoark
 
 Legg flere bilder på utskriftsark i A4-, A3-, Letter-, Legal- eller fotopapirformat. Velg antall bilder per side, retning, tilpasning og avstand, og forhåndsvis sidene før utskrift eller lagring som PDF. Bildene behandles lokalt i nettleseren.
+
+### Filkonvertering
+
+Bildeverktøyet konverterer flere filer samtidig til PNG, JPEG eller WebP. Inndataformat avhenger av hva nettleseren kan dekode; animerte bilder blir stillbilder. Videokonverteringen spiller av og tar opp videostrømmen på nytt, med kodekene nettleserens MediaRecorder støtter. Dette skjer i sanntid, og støtten for videoformater varierer mellom nettlesere og operativsystemer. Filer behandles lokalt.
 
 ## Design
 

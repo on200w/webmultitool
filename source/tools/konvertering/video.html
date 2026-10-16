@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Videokonvertering</title>
+  <style>
+    :root {
+      --brand-green: #009d4f;
+      --brand-deep-green: #005850;
+      --surface: rgba(255, 255, 255, 0.95);
+      --text: #12332f;
+      --muted: #385552;
+      --border: #afbbbb;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; padding: 24px; color: var(--text); font-family: "Segoe UI", Calibri, sans-serif; background: linear-gradient(140deg, #edf6f1, #cfd2d3); }
+    .wrap { width: min(900px, 100%); margin: 0 auto; }
+    h1 { margin: 0 0 8px; }
+    .intro, .note { color: var(--muted); line-height: 1.5; }
+    .panel { margin-top: 20px; padding: 18px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; }
+    label { display: block; margin-bottom: 6px; font-weight: 700; }
+    input, select, button { font: inherit; }
+    input[type="file"], select, button { width: 100%; min-height: 44px; padding: 9px 11px; color: var(--text); background: #fff; border: 1px solid var(--border); border-radius: 7px; }
+    .controls { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
+    input[type="range"] { width: 100%; accent-color: var(--brand-green); }
+    button { margin-top: 18px; color: #fff; background: var(--brand-deep-green); border-color: transparent; font-weight: 700; cursor: pointer; }
+    button:disabled { opacity: 0.55; cursor: wait; }
+    video { display: block; width: 100%; max-height: 440px; margin-top: 16px; background: #152521; }
+    .status { min-height: 1.5em; margin: 14px 0 0; color: var(--muted); }
+    .download { display: inline-block; margin-top: 12px; color: var(--brand-deep-green); font-weight: 700; }
+    .back { display: inline-block; margin-top: 20px; color: var(--brand-deep-green); font-weight: 700; text-decoration: none; }
+    .back:hover { text-decoration: underline; }
+    @media (max-width: 620px) { body { padding: 16px; } .controls { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <h1>Videokonvertering</h1>
+    <p class="intro">Konverter video med nettleserens innebygde kodeker. Tilgjengelige inndata og utdata avhenger av nettleser og operativsystem.</p>
+    <section class="panel">
+      <label for="file">Videofil</label>
+      <input id="file" type="file" accept="video/*" />
+      <div class="controls">
+        <div>
+          <label for="format">Utdataformat</label>
+          <select id="format"></select>
+        </div>
+        <div>
+          <label for="bitrate">Videokvalitet</label>
+          <select id="bitrate">
+            <option value="1000000">Lavere filstørrelse (1 Mbps)</option>
+            <option value="2500000" selected>Standard (2,5 Mbps)</option>
+            <option value="5000000">Høy (5 Mbps)</option>
+            <option value="8000000">Svært høy (8 Mbps)</option>
+          </select>
+        </div>
+      </div>
+      <p class="note">Konverteringen skjer i sanntid: en video på 2 minutter tar minst 2 minutter. Lukk ikke siden mens den pågår. Avspilling av enkelte formater, som HEVC/H.265, krever støtte fra enheten.</p>
+      <button id="convert" type="button" disabled>Konverter video</button>
+      <video id="preview" controls hidden></video>
+      <p id="status" class="status" role="status" aria-live="polite"></p>
+      <a id="download" class="download" hidden></a>
+    </section>
+    <a class="back" href="index.html">Tilbake til konvertering</a>
+  </main>
+  <script>
+    const fileInput = document.getElementById("file");
+    const formatInput = document.getElementById("format");
+    const bitrateInput = document.getElementById("bitrate");
+    const convertButton = document.getElementById("convert");
+    const preview = document.getElementById("preview");
+    const status = document.getElementById("status");
+    const download = document.getElementById("download");
+    let sourceUrl = "";
+    let outputUrl = "";
+    let converting = false;
+    let videoReady = false;
+
+    const outputTypes = [
+      { mime: "video/webm;codecs=vp9,opus", label: "WebM (VP9)" },
+      { mime: "video/webm;codecs=vp8,opus", label: "WebM (VP8)" },
+      { mime: "video/mp4;codecs=avc1.42E01E,mp4a.40.2", label: "MP4 (H.264)" },
+      { mime: "video/mp4", label: "MP4" },
+      { mime: "video/webm", label: "WebM" }
+    ];
+
+    function supportedOutputTypes() {
+      if (!window.MediaRecorder || typeof MediaRecorder.isTypeSupported !== "function") return [];
+      return outputTypes.filter((type) => MediaRecorder.isTypeSupported(type.mime));
+    }
+
+    function updateAvailability() {
+      const formats = supportedOutputTypes();
+      formatInput.replaceChildren();
+      formats.forEach((format) => {
+        const option = document.createElement("option");
+        option.value = format.mime;
+        option.textContent = format.label;
+        formatInput.appendChild(option);
+      });
+      convertButton.disabled = !formats.length || !fileInput.files.length || !videoReady || converting;
+      if (!formats.length) {
+        status.textContent = "Denne nettleseren støtter ikke videokonvertering. Prøv en oppdatert versjon av Chrome, Edge eller Firefox.";
+      } else if (fileInput.files.length && !videoReady) {
+        status.textContent = "Laster og kontrollerer video ...";
+      }
+    }
+
+    preview.addEventListener("loadedmetadata", () => {
+      videoReady = true;
+      status.textContent = `Video klar (${preview.videoWidth} × ${preview.videoHeight}).`;
+      updateAvailability();
+    });
+    preview.addEventListener("error", () => {
+      videoReady = false;
+      convertButton.disabled = true;
+      status.textContent = "Videoen kan ikke spilles av i denne nettleseren eller har et format enheten ikke støtter.";
+    });
+
+    fileInput.addEventListener("change", () => {
+      if (sourceUrl) URL.revokeObjectURL(sourceUrl);
+      if (outputUrl) URL.revokeObjectURL(outputUrl);
+      sourceUrl = "";
+      outputUrl = "";
+      videoReady = false;
+      download.hidden = true;
+      preview.hidden = true;
+      const file = fileInput.files[0];
+      if (!file) {
+        updateAvailability();
+        return;
+      }
+      sourceUrl = URL.createObjectURL(file);
+      preview.src = sourceUrl;
+      preview.hidden = false;
+      updateAvailability();
+    });
+
+    convertButton.addEventListener("click", async () => {
+      const file = fileInput.files[0];
+      const capture = preview.captureStream || preview.mozCaptureStream;
+      if (!file || !capture || !window.MediaRecorder) {
+        status.textContent = "Nettleseren kan ikke hente lyd- og bildestrømmen fra denne videoen.";
+        return;
+      }
+      converting = true;
+      updateAvailability();
+      download.hidden = true;
+      if (outputUrl) URL.revokeObjectURL(outputUrl);
+      status.textContent = "Konverterer i sanntid ...";
+
+      let stream;
+      let recorder;
+      const chunks = [];
+      try {
+        preview.pause();
+        preview.currentTime = 0;
+        await new Promise((resolve, reject) => {
+          if (preview.error) reject(new Error("Videoen kan ikke spilles av i denne nettleseren."));
+          else if (preview.readyState >= 1) resolve();
+          else {
+            const timeout = window.setTimeout(() => finish(new Error("Tidsavbrudd mens videoen ble lest.")), 15000);
+            const finish = (error) => {
+              window.clearTimeout(timeout);
+              preview.removeEventListener("loadedmetadata", onLoadedMetadata);
+              preview.removeEventListener("error", onVideoError);
+              if (error) reject(error);
+              else resolve();
+            };
+            const onLoadedMetadata = () => finish();
+            const onVideoError = () => finish(new Error("Videoen kan ikke spilles av i denne nettleseren."));
+            preview.addEventListener("loadedmetadata", onLoadedMetadata, { once: true });
+            preview.addEventListener("error", onVideoError, { once: true });
+          }
+        });
+        stream = capture.call(preview);
+        recorder = new MediaRecorder(stream, {
+          mimeType: formatInput.value,
+          videoBitsPerSecond: Number(bitrateInput.value)
+        });
+        const stopped = new Promise((resolve, reject) => {
+          recorder.addEventListener("dataavailable", (event) => {
+            if (event.data.size) chunks.push(event.data);
+          });
+          recorder.addEventListener("stop", resolve, { once: true });
+          recorder.addEventListener("error", () => reject(new Error("Nettleseren fikk en feil under konverteringen.")), { once: true });
+          preview.addEventListener("ended", () => {
+            if (recorder.state !== "inactive") recorder.stop();
+          }, { once: true });
+        });
+        recorder.start(1000);
+        await preview.play();
+        await stopped;
+        const mimeType = recorder.mimeType || formatInput.value;
+        const blob = new Blob(chunks, { type: mimeType });
+        if (!blob.size) throw new Error("Konverteringen ga ingen videodata.");
+        outputUrl = URL.createObjectURL(blob);
+        const extension = mimeType.startsWith("video/mp4") ? "mp4" : "webm";
+        download.href = outputUrl;
+        download.download = `${file.name.replace(/\.[^.]+$/, "") || "video"}.${extension}`;
+        download.textContent = `Last ned konvertert video (${(blob.size / 1024 / 1024).toFixed(1)} MB)`;
+        download.hidden = false;
+        status.textContent = "Konvertering ferdig.";
+      } catch (error) {
+        if (recorder && recorder.state !== "inactive") recorder.stop();
+        status.textContent = error.message || "Kunne ikke konvertere videoen.";
+      } finally {
+        if (stream) stream.getTracks().forEach((track) => track.stop());
+        preview.pause();
+        converting = false;
+        updateAvailability();
+      }
+    });
+
+    updateAvailability();
+  </script>
+</body>
+</html>

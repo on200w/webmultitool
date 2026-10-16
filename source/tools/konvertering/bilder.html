@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bildekonvertering</title>
+  <style>
+    :root {
+      --brand-green: #009d4f;
+      --brand-deep-green: #005850;
+      --surface: rgba(255, 255, 255, 0.95);
+      --text: #12332f;
+      --muted: #385552;
+      --border: #afbbbb;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      padding: 24px;
+      color: var(--text);
+      font-family: "Segoe UI", Calibri, sans-serif;
+      background: linear-gradient(140deg, #edf6f1, #cfd2d3);
+    }
+    .wrap { width: min(900px, 100%); margin: 0 auto; }
+    h1 { margin: 0 0 8px; }
+    .intro, .note { color: var(--muted); line-height: 1.5; }
+    .panel { margin-top: 20px; padding: 18px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; }
+    label { display: block; margin-bottom: 6px; font-weight: 700; }
+    input, select, button { font: inherit; }
+    input[type="file"], select, button {
+      width: 100%;
+      min-height: 44px;
+      padding: 9px 11px;
+      color: var(--text);
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 7px;
+    }
+    .controls { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
+    .quality-row { display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: center; }
+    input[type="range"] { width: 100%; accent-color: var(--brand-green); }
+    button { margin-top: 18px; color: #fff; background: var(--brand-deep-green); border-color: transparent; font-weight: 700; cursor: pointer; }
+    button:disabled { opacity: 0.55; cursor: wait; }
+    .results { display: grid; gap: 10px; margin-top: 16px; }
+    .result { display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: center; padding: 12px; border-bottom: 1px solid #e2e8e7; }
+    .result a { color: var(--brand-deep-green); font-weight: 700; }
+    .status { min-height: 1.5em; margin: 14px 0 0; color: var(--muted); }
+    .back { display: inline-block; margin-top: 20px; color: var(--brand-deep-green); font-weight: 700; text-decoration: none; }
+    .back:hover { text-decoration: underline; }
+    @media (max-width: 620px) { body { padding: 16px; } .controls { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <h1>Bildekonvertering</h1>
+    <p class="intro">Velg bilder og konverter dem samlet. Vanlige inndata er JPEG, PNG, WebP, GIF, BMP, SVG og AVIF, avhengig av nettleserstøtte.</p>
+    <section class="panel">
+      <label for="files">Bilder</label>
+      <input id="files" type="file" accept="image/*" multiple />
+
+      <div class="controls">
+        <div>
+          <label for="format">Konverter til</label>
+          <select id="format">
+            <option value="image/png">PNG</option>
+            <option value="image/jpeg">JPEG</option>
+            <option value="image/webp">WebP</option>
+          </select>
+        </div>
+        <div id="qualityControl">
+          <label for="quality">Kvalitet</label>
+          <div class="quality-row">
+            <input id="quality" type="range" min="10" max="100" value="88" />
+            <output id="qualityValue" for="quality">88%</output>
+          </div>
+        </div>
+      </div>
+      <p class="note">Gjennomsiktighet beholdes i PNG og WebP. JPEG har ikke gjennomsiktighet. Animerte bilder konverteres som stillbilder.</p>
+      <button id="convert" type="button">Konverter bilder</button>
+      <p id="status" class="status" role="status" aria-live="polite"></p>
+      <div id="results" class="results"></div>
+    </section>
+    <a class="back" href="index.html">Tilbake til konvertering</a>
+  </main>
+  <script>
+    const filesInput = document.getElementById("files");
+    const formatInput = document.getElementById("format");
+    const qualityInput = document.getElementById("quality");
+    const qualityValue = document.getElementById("qualityValue");
+    const qualityControl = document.getElementById("qualityControl");
+    const convertButton = document.getElementById("convert");
+    const status = document.getElementById("status");
+    const results = document.getElementById("results");
+    const objectUrls = [];
+
+    function updateFormatOptions() {
+      qualityControl.hidden = formatInput.value === "image/png";
+    }
+
+    function loadImage(file) {
+      return new Promise((resolve, reject) => {
+        const image = new Image();
+        const url = URL.createObjectURL(file);
+        image.onload = () => resolve({ image, url });
+        image.onerror = () => {
+          URL.revokeObjectURL(url);
+          reject(new Error("Nettleseren kan ikke lese bildet."));
+        };
+        image.src = url;
+      });
+    }
+
+    function convertImage(file) {
+      return loadImage(file).then(({ image, url }) => new Promise((resolve, reject) => {
+        const canvas = document.createElement("canvas");
+        canvas.width = image.naturalWidth;
+        canvas.height = image.naturalHeight;
+        const context = canvas.getContext("2d");
+        if (!context) {
+          URL.revokeObjectURL(url);
+          reject(new Error("Kunne ikke opprette bildeflate."));
+          return;
+        }
+        if (formatInput.value === "image/jpeg") {
+          context.fillStyle = "#ffffff";
+          context.fillRect(0, 0, canvas.width, canvas.height);
+        }
+        context.drawImage(image, 0, 0);
+        canvas.toBlob((blob) => {
+          URL.revokeObjectURL(url);
+          if (!blob || blob.type !== formatInput.value) {
+            reject(new Error("Nettleseren støtter ikke valgt utdataformat."));
+            return;
+          }
+          resolve(blob);
+        }, formatInput.value, Number(qualityInput.value) / 100);
+      }));
+    }
+
+    function outputName(file, mimeType) {
+      const extension = mimeType === "image/jpeg" ? "jpg" : mimeType.slice("image/".length);
+      const baseName = file.name.replace(/\.[^.]+$/, "") || "bilde";
+      return `${baseName}.${extension}`;
+    }
+
+    function clearResults() {
+      results.replaceChildren();
+      objectUrls.splice(0).forEach(URL.revokeObjectURL);
+    }
+
+    qualityInput.addEventListener("input", () => {
+      qualityValue.value = `${qualityInput.value}%`;
+      qualityValue.textContent = `${qualityInput.value}%`;
+    });
+    formatInput.addEventListener("change", updateFormatOptions);
+    filesInput.addEventListener("change", () => {
+      clearResults();
+      status.textContent = `${filesInput.files.length} bilde(r) valgt.`;
+    });
+    convertButton.addEventListener("click", async () => {
+      const files = Array.from(filesInput.files);
+      if (!files.length) {
+        status.textContent = "Velg minst ett bilde først.";
+        return;
+      }
+      clearResults();
+      convertButton.disabled = true;
+      let converted = 0;
+      const errors = [];
+      for (const file of files) {
+        status.textContent = `Konverterer ${converted + errors.length + 1} av ${files.length}: ${file.name}`;
+        try {
+          const blob = await convertImage(file);
+          const url = URL.createObjectURL(blob);
+          objectUrls.push(url);
+          const row = document.createElement("div");
+          row.className = "result";
+          const name = document.createElement("span");
+          name.textContent = `${outputName(file, formatInput.value)} (${(blob.size / 1024).toFixed(0)} KB)`;
+          const link = document.createElement("a");
+          link.href = url;
+          link.download = outputName(file, formatInput.value);
+          link.textContent = "Last ned";
+          row.append(name, link);
+          results.appendChild(row);
+          converted += 1;
+        } catch (error) {
+          errors.push(`${file.name}: ${error.message}`);
+        }
+      }
+      status.textContent = `${converted} av ${files.length} bilde(r) konvertert.${errors.length ? ` Feil: ${errors.join(" ")}` : ""}`;
+      convertButton.disabled = false;
+    });
+    updateFormatOptions();
+  </script>
+</body>
+</html>
