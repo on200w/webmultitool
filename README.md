@@ -1,3 +1,5 @@
+Nettside: https://webmultitool.pages.dev/
+
 # Webmultiverktøy
 
 En samling frittstående nettbaserte verktøy. Ingen backend, ingen bygg-steg — hvert verktøy er én HTML-fil med inline CSS og JavaScript. Bruk snarveien `Verktoy - START HER.lnk` i rotmappen, eller åpne [source/app/index.html](source/app/index.html) direkte i nettleseren, for å starte.
