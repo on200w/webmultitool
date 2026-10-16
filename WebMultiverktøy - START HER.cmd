@@ -1,7 +1,7 @@
 @echo off
 setlocal
 set "ROOT=%~dp0"
-set "TARGET=%ROOT%source\app\index.html"
+set "TARGET=%ROOT%source\index.html"
 
 if not exist "%TARGET%" (
   echo Fant ikke filen:

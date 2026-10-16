@@ -2,14 +2,14 @@ Nettside: https://webmultitool.pages.dev/
 
 # Webmultiverktøy
 
-En samling frittstående nettbaserte verktøy. Ingen backend, ingen bygg-steg — hvert verktøy er én HTML-fil med inline CSS og JavaScript. Bruk snarveien `Verktoy - START HER.lnk` i rotmappen, eller åpne [source/app/index.html](source/app/index.html) direkte i nettleseren, for å starte.
+En samling frittstående nettbaserte verktøy. Ingen backend, ingen bygg-steg — hvert verktøy er én HTML-fil med inline CSS og JavaScript. Bruk snarveien `WebMultiverktøy - START HER.cmd` i rotmappen, eller åpne [source/index.html](source/index.html) direkte i nettleseren, for å starte.
 
 ## Mappestruktur
 
 ```
-Verktoy - START HER.lnk    Snarvei med eget ikon som åpner source/app/index.html
+WebMultiverktøy - START HER.cmd  Starter source/index.html
 source/
-  app/index.html           Hovedmeny med lenker til alle verktøy/kategorier
+  index.html               Hovedmeny med lenker til alle verktøy/kategorier
   tools/
     konvertering/index.html Konverteringsmeny for video og bilder
     konvertering/video.html Videokonvertering med nettleserens MediaRecorder
