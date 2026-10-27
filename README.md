@@ -108,7 +108,6 @@ Bildeverktøyet konverterer flere filer samtidig til PNG, JPEG eller WebP. Innda
 ![Filkonvertering med valg for video og bilder](source/images/filkonvertering.png)
 
 ## Design
-
 Alle sider deler samme fargepalett og stil:
 
 - `--brand-green: #009d4f`
