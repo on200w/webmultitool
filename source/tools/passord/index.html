@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/png" href="../../images/app-multi.png" />
+  <title>Passord og sikkerhet</title>
+  <style>
+    :root {
+      --brand-green: #009d4f;
+      --brand-deep-green: #005850;
+      --brand-light: #cfd2d3;
+      --surface: rgba(255, 255, 255, 0.94);
+      --text: #12332f;
+      --muted: #385552;
+      --border: #afbbbb;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      padding: 20px;
+      font-family: "Segoe UI", Calibri, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 18% 16%, rgba(0, 157, 79, 0.22) 0 20%, transparent 36%),
+        radial-gradient(circle at 82% 8%, rgba(0, 88, 80, 0.22) 0 18%, transparent 34%),
+        linear-gradient(135deg, #e8f4ee, #cfd2d3);
+    }
+    .wrap { width: min(1200px, 100%); margin: 0 auto; }
+    h1 { margin: 0 0 8px; }
+    .intro, .note { color: var(--muted); line-height: 1.45; }
+    .intro { margin: 0 0 18px; max-width: 75ch; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
+    .panel {
+      display: grid;
+      align-content: start;
+      gap: 12px;
+      padding: 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      box-shadow: 0 10px 28px rgba(0, 88, 80, 0.14);
+    }
+    h2 { margin: 0; font-size: 1.2rem; }
+    h3 { margin: 4px 0 0; font-size: 1rem; }
+    label { display: block; margin-bottom: 4px; font-weight: 600; }
+    input, select, button {
+      width: 100%;
+      padding: 9px 10px;
+      font: inherit;
+      color: var(--text);
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 9px;
+    }
+    input[type="checkbox"] { width: auto; margin: 0; accent-color: var(--brand-green); }
+    input[type="range"] { padding: 0; accent-color: var(--brand-green); }
+    button { cursor: pointer; font-weight: 700; }
+    .primary { color: #fff; background: var(--brand-green); border-color: transparent; }
+    .secondary { color: #fff; background: var(--brand-deep-green); border-color: transparent; }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .checks { display: grid; gap: 7px; }
+    .check { display: flex; align-items: center; gap: 8px; font-weight: 400; }
+    .output {
+      min-height: 44px;
+      padding: 10px;
+      overflow-wrap: anywhere;
+      font-family: Consolas, monospace;
+      background: #f3f7f5;
+      border: 1px solid var(--border);
+      border-radius: 9px;
+    }
+    .output:empty::before { content: "Resultatet vises her"; color: #70837f; font-family: "Segoe UI", Calibri, sans-serif; }
+    .meter { height: 10px; overflow: hidden; background: #e4e9e7; border-radius: 999px; }
+    .meter span { display: block; height: 100%; width: 0; transition: width 150ms ease, background 150ms ease; }
+    .strength { display: flex; justify-content: space-between; gap: 8px; font-weight: 700; }
+    .meta, .status { color: var(--muted); font-size: 0.9rem; }
+    .status { min-height: 1.3em; }
+    .back { display: inline-block; margin-top: 18px; color: var(--brand-deep-green); font-weight: 700; text-decoration: none; }
+    .back:hover { text-decoration: underline; }
+    @media (max-width: 600px) { .row { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <h1>Passord og sikkerhet</h1>
+    <p class="intro">Verktøyene under kjører lokalt i nettleseren. Passord og filer sendes ikke til en server.</p>
+
+    <div class="grid">
+      <section class="panel">
+        <h2>Passordgenerator</h2>
+        <div>
+          <label for="passwordLength">Lengde: <span id="passwordLengthValue">20</span></label>
+          <input id="passwordLength" type="range" min="8" max="64" value="20" />
+        </div>
+        <div class="checks">
+          <label class="check"><input id="lowercase" type="checkbox" checked /> Små bokstaver</label>
+          <label class="check"><input id="uppercase" type="checkbox" checked /> Store bokstaver</label>
+          <label class="check"><input id="numbers" type="checkbox" checked /> Tall</label>
+          <label class="check"><input id="symbols" type="checkbox" checked /> Symboler</label>
+        </div>
+        <div class="output" id="passwordOutput" aria-live="polite"></div>
+        <div class="row">
+          <button class="primary" id="generatePassword" type="button">Generer passord</button>
+          <button id="copyPassword" type="button">Kopier</button>
+        </div>
+        <h3>Huskbar passfrase</h3>
+        <div class="row">
+          <div>
+            <label for="wordCount">Antall ord</label>
+            <select id="wordCount">
+              <option>4</option><option selected>5</option><option>6</option><option>7</option>
+            </select>
+          </div>
+          <div>
+            <label for="separator">Skilletegn</label>
+            <input id="separator" value="-" maxlength="3" />
+          </div>
+        </div>
+        <button class="secondary" id="generatePhrase" type="button">Generer passfrase</button>
+        <div class="output" id="phraseOutput" aria-live="polite"></div>
+        <button id="copyPhrase" type="button">Kopier passfrase</button>
+        <p class="status" id="generatorStatus" aria-live="polite"></p>
+      </section>
+
+      <section class="panel">
+        <h2>Hash-generator</h2>
+        <p class="note">Bruk tekst eller en fil for å beregne en kontrollsum med Web Crypto API.</p>
+        <div>
+          <label for="hashAlgorithm">Algoritme</label>
+          <select id="hashAlgorithm">
+            <option>SHA-256</option><option>SHA-384</option><option>SHA-512</option><option>SHA-1</option>
+          </select>
+        </div>
+        <div>
+          <label for="hashText">Tekst</label>
+          <textarea id="hashText" rows="5" placeholder="Skriv eller lim inn tekst"></textarea>
+        </div>
+        <button class="primary" id="hashTextButton" type="button">Beregn hash fra tekst</button>
+        <div>
+          <label for="hashFile">Fil</label>
+          <input id="hashFile" type="file" />
+        </div>
+        <button id="hashFileButton" type="button">Beregn hash fra fil</button>
+        <div class="output" id="hashOutput" aria-live="polite"></div>
+        <button id="copyHash" type="button">Kopier hash</button>
+        <p class="status" id="hashStatus" aria-live="polite"></p>
+      </section>
+
+      <section class="panel">
+        <h2>Passordstyrke-sjekker</h2>
+        <label for="strengthInput">Passord</label>
+        <input id="strengthInput" type="password" autocomplete="off" placeholder="Skriv inn et passord" />
+        <div class="meter" aria-hidden="true"><span id="strengthMeter"></span></div>
+        <div class="strength"><span id="strengthLabel">Ikke vurdert</span><span id="strengthScore"></span></div>
+        <p class="note" id="strengthAdvice">Passordet vurderes bare i denne nettleseren.</p>
+        <div class="status" id="strengthChecks"></div>
+      </section>
+    </div>
+    <a class="back" href="../../index.html">Tilbake til hovedmeny</a>
+  </main>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const randomIndex = (length) => {
+      const values = new Uint32Array(1);
+      const limit = Math.floor(0x100000000 / length) * length;
+      do { crypto.getRandomValues(values); } while (values[0] >= limit);
+      return values[0] % length;
+    };
+    const copy = (text, status) => {
+      if (!text) return;
+      navigator.clipboard.writeText(text)
+        .then(() => { status.textContent = "Kopiert til utklippstavlen."; })
+        .catch((error) => { status.textContent = `Kunne ikke kopiere: ${error.message}`; });
+    };
+
+    const passwordSets = {
+      lowercase: "abcdefghijkmnopqrstuvwxyz",
+      uppercase: "ABCDEFGHJKLMNPQRSTUVWXYZ",
+      numbers: "23456789",
+      symbols: "!@#$%^&*()-_=+[]{}?"
+    };
+    function generatePassword() {
+      const selected = Object.keys(passwordSets).filter((key) => $(key).checked);
+      const length = Number($("passwordLength").value);
+      if (!selected.length) {
+        $("generatorStatus").textContent = "Velg minst én tegntype.";
+        return;
+      }
+      const chars = selected.map((key) => passwordSets[key][randomIndex(passwordSets[key].length)]);
+      const pool = selected.map((key) => passwordSets[key]).join("");
+      while (chars.length < length) chars.push(pool[randomIndex(pool.length)]);
+      for (let i = chars.length - 1; i > 0; i--) {
+        const j = randomIndex(i + 1);
+        [chars[i], chars[j]] = [chars[j], chars[i]];
+      }
+      $("passwordOutput").textContent = chars.join("");
+      $("generatorStatus").textContent = "";
+    }
+    const words = "anker appelsin bjørk blomst bok fjell flamme frokost gryte hav hjerte hvit isbre kaffe katt klokke kompass lampe løve måne morgen nøkkel papir regn skog sol stjerne stein strøm sølv tåke vind vinter eple".split(" ");
+    function generatePhrase() {
+      const count = Number($("wordCount").value);
+      const separator = $("separator").value || "-";
+      $("phraseOutput").textContent = Array.from({ length: count }, () => words[randomIndex(words.length)]).join(separator);
+    }
+    $("passwordLength").addEventListener("input", () => { $("passwordLengthValue").textContent = $("passwordLength").value; });
+    $("generatePassword").addEventListener("click", generatePassword);
+    $("generatePhrase").addEventListener("click", generatePhrase);
+    $("copyPassword").addEventListener("click", () => copy($("passwordOutput").textContent, $("generatorStatus")));
+    $("copyPhrase").addEventListener("click", () => copy($("phraseOutput").textContent, $("generatorStatus")));
+    generatePassword();
+    generatePhrase();
+
+    async function hashData(data) {
+      const digest = await crypto.subtle.digest($("hashAlgorithm").value, data);
+      return Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, "0")).join("");
+    }
+    $("hashTextButton").addEventListener("click", async () => {
+      try {
+        $("hashOutput").textContent = await hashData(new TextEncoder().encode($("hashText").value));
+        $("hashStatus").textContent = "";
+      } catch (error) {
+        $("hashStatus").textContent = `Kunne ikke beregne hash: ${error.message}`;
+      }
+    });
+    $("hashFileButton").addEventListener("click", async () => {
+      const file = $("hashFile").files[0];
+      if (!file) { $("hashStatus").textContent = "Velg en fil først."; return; }
+      try {
+        $("hashOutput").textContent = await hashData(await file.arrayBuffer());
+        $("hashStatus").textContent = `${file.name} behandlet lokalt.`;
+      } catch (error) {
+        $("hashStatus").textContent = `Kunne ikke beregne hash: ${error.message}`;
+      }
+    });
+    $("copyHash").addEventListener("click", () => copy($("hashOutput").textContent, $("hashStatus")));
+
+    function updateStrength() {
+      const value = $("strengthInput").value;
+      if (!value) {
+        $("strengthMeter").style.width = "0";
+        $("strengthLabel").textContent = "Ikke vurdert";
+        $("strengthScore").textContent = "";
+        $("strengthAdvice").textContent = "Passordet vurderes bare i denne nettleseren.";
+        $("strengthChecks").textContent = "";
+        return;
+      }
+      const checks = [
+        ["Minst 12 tegn", value.length >= 12],
+        ["Store og små bokstaver", /[a-z]/.test(value) && /[A-Z]/.test(value)],
+        ["Tall", /\d/.test(value)],
+        ["Symboler", /[^A-Za-z0-9]/.test(value)],
+        ["Unngår gjentakelser", !/(.)\1{2,}/.test(value)]
+      ];
+      let score = checks.filter(([, passed]) => passed).length;
+      if (value.length >= 16) score = Math.min(5, score + 1);
+      const labels = ["Svært svakt", "Svakt", "Middels", "Sterkt", "Svært sterkt"];
+      const colors = ["#b42318", "#d97706", "#b58b00", "#278447", "#087443"];
+      $("strengthMeter").style.width = `${score * 20}%`;
+      $("strengthMeter").style.background = colors[Math.max(0, score - 1)];
+      $("strengthLabel").textContent = labels[Math.max(0, score - 1)];
+      $("strengthScore").textContent = `${score}/5`;
+      $("strengthAdvice").textContent = score >= 4 ? "Dette ser bra ut. Bruk et unikt passord for hver tjeneste." : "Prøv en lengre passfrase med flere ulike tegntyper.";
+      $("strengthChecks").innerHTML = checks.map(([label, passed]) => `${passed ? "✓" : "○"} ${label}`).join("<br>");
+    }
+    $("strengthInput").addEventListener("input", updateStrength);
+  </script>
+</body>
+</html>

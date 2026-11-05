@@ -25,6 +25,7 @@ source/
     fargepalett/index.html  Fargepalett-verktøy
     tekstteller/index.html  Tekst-/ord-teller
     strekkode/index.html    Strekkode-generator
+    passord/index.html       Passordgenerator, hash-generator og passordstyrke-sjekker
 ```
 
 ## Verktøy
@@ -39,6 +40,7 @@ source/
 | Fargepalett-verktøy | Lag nyanser og beslektede farger fra en basisfarge, sjekk WCAG-kontrast mellom to farger. |
 | Tekst-/ord-teller | Tell tegn, ord, setninger og avsnitt, og få et estimat på lesetid. |
 | Strekkode-generator | Lag strekkoder (CODE128, EAN, UPC, CODE39, ITF-14), last ned som PNG eller SVG. |
+| Passord og sikkerhet | Generer passord og passfraser, beregn SHA-hash for tekst/filer og sjekk passordstyrke lokalt. |
 | Fotoark | Sett flere bilder på A4, A3 eller fotopapir, forhåndsvis sidene og skriv ut eller lagre som PDF. |
 | Filkonvertering | Konverter bilder til PNG/JPEG/WebP og video til nettleserens tilgjengelige MediaRecorder-formater. |
 
