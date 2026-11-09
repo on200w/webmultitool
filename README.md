@@ -25,7 +25,7 @@ source/
     fargepalett/index.html  Fargepalett-verktøy
     tekstteller/index.html  Tekst-/ord-teller
     strekkode/index.html    Strekkode-generator
-    passord/index.html       Passordgenerator, hash-generator og passordstyrke-sjekker
+    passord/index.html      Passordgenerator, passfrasegenerator, hash-verktøy og styrkesjekk
 ```
 
 ## Verktøy
@@ -40,9 +40,15 @@ source/
 | Fargepalett-verktøy | Lag nyanser og beslektede farger fra en basisfarge, sjekk WCAG-kontrast mellom to farger. |
 | Tekst-/ord-teller | Tell tegn, ord, setninger og avsnitt, og få et estimat på lesetid. |
 | Strekkode-generator | Lag strekkoder (CODE128, EAN, UPC, CODE39, ITF-14), last ned som PNG eller SVG. |
-| Passord og sikkerhet | Generer passord og passfraser, beregn SHA-hash for tekst/filer og sjekk passordstyrke lokalt. |
+| Passord og sikkerhet | Generer passord og passfraser, beregn SHA-1/SHA-2-kontrollsummer for tekst eller filer, og vurder passordstyrke lokalt. |
 | Fotoark | Sett flere bilder på A4, A3 eller fotopapir, forhåndsvis sidene og skriv ut eller lagre som PDF. |
 | Filkonvertering | Konverter bilder til PNG/JPEG/WebP og video til nettleserens tilgjengelige MediaRecorder-formater. |
+
+### Passord og sikkerhet
+
+Tre verktøy samlet på én side: en passordgenerator med valg av lengde og tegntyper, en generator for huskbare passfraser, og en styrkesjekk med konkrete kriterier. Hash-generatoren beregner SHA-1, SHA-256, SHA-384 eller SHA-512 for tekst og filer. Passord og filer behandles lokalt i nettleseren; ingenting sendes til en server.
+
+![Passord og sikkerhet med passordgenerator, hash-generator og styrkesjekk](source/images/passord-sikkerhet.png)
 
 ### QR-kode generator (enkel)
 
