@@ -14,8 +14,8 @@ source/
     konvertering/video.html Videokonvertering med nettleserens MediaRecorder
     konvertering/bilder.html Batch-konvertering av bilder til PNG, JPEG eller WebP
     qr/index.html           Undermeny: velg mellom enkel og utvidet QR-generator
-    qr-simple/index.html    QR-kode generator (enkel)
-    qr-plus/index.html      QR-kode generator (utvidet)
+      qr-simple/index.html  QR-kode generator (enkel)
+      qr-plus/index.html    QR-kode generator (utvidet)
     innhold/index.html      Undermeny: plakat, infoskjerm, video og fotoark
     plakat/index.html       Plakatgenerator
     infoskjerm/index.html   Infoskjerm-planlegger
