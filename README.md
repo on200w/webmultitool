@@ -1,5 +1,4 @@
-Nettside: https://webmultitool.pages.dev/
-
+## https://webmultitool.pages.dev/
 # Webmultiverktøy
 
 En samling frittstående nettbaserte verktøy. Ingen backend, ingen bygg-steg — hvert verktøy er én HTML-fil med inline CSS og JavaScript. Bruk snarveien `WebMultiverktøy - START HER.cmd` i rotmappen, eller åpne [source/index.html](source/index.html) direkte i nettleseren, for å starte.
