@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/png" href="../../../images/app-multi.png" />
+  <title>Canon imagePROGRAF TX-3100 - Storformatutskrift</title>
+  <style id="printPageStyle"></style>
+  <style>
+    :root {
+      --brand-green: #009d4f;
+      --brand-deep-green: #005850;
+      --brand-light: #cfd2d3;
+      --surface: rgba(255, 255, 255, 0.94);
+      --text: #12332f;
+      --muted: #385552;
+      --border: #afbbbb;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      padding: 24px;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 18% 16%, rgba(0, 157, 79, 0.2) 0 20%, transparent 36%),
+        radial-gradient(circle at 82% 8%, rgba(0, 88, 80, 0.2) 0 18%, transparent 34%),
+        linear-gradient(135deg, #e8f4ee, #cfd2d3);
+      font-family: "Segoe UI", Calibri, sans-serif;
+    }
+    .wrap { width: min(1380px, 100%); margin: 0 auto; }
+    h1 { margin: 0; font-size: 1.8rem; }
+    .intro { margin: 7px 0 20px; color: var(--muted); }
+    .layout { display: grid; grid-template-columns: minmax(310px, 390px) minmax(0, 1fr); gap: 18px; align-items: start; }
+    .panel, .preview {
+      min-width: 0;
+      padding: 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+    }
+    .panel { display: grid; gap: 13px; }
+    .field { min-width: 0; }
+    .mode-switch { min-width: 0; margin: 0; padding: 0; border: 0; }
+    .mode-switch legend { margin-bottom: 5px; font-weight: 650; }
+    .mode-options { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; border: 1px solid var(--border); border-radius: 9px; background: #e7ece9; }
+    .mode-options label { display: flex; align-items: center; justify-content: center; gap: 7px; min-height: 38px; margin: 0; padding: 5px; border-radius: 6px; cursor: pointer; font-size: 0.9rem; }
+    .mode-options label:has(input:checked) { background: #fff; box-shadow: 0 1px 4px rgba(18, 51, 47, 0.18); }
+    .mode-options input { width: 16px; min-height: 16px; height: 16px; margin: 0; accent-color: var(--brand-green); }
+    label { display: block; margin-bottom: 5px; font-weight: 650; }
+    input, select, textarea, button {
+      width: 100%;
+      min-height: 40px;
+      padding: 8px 10px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--text);
+      font: inherit;
+    }
+    input[type="color"] { padding: 4px; }
+    textarea { min-height: 128px; resize: vertical; line-height: 1.45; }
+    input:focus, select:focus, textarea:focus, button:focus-visible, summary:focus-visible {
+      outline: 2px solid rgba(0, 157, 79, 0.58);
+      outline-offset: 2px;
+    }
+    .dimensions, .colors { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .hint, .meta { margin: 5px 0 0; color: var(--muted); font-size: 0.86rem; line-height: 1.4; }
+    .actions { display: grid; grid-template-columns: 1.2fr 1fr; gap: 8px; }
+    button { cursor: pointer; font-weight: 700; }
+    #printBtn { color: #fff; background: var(--brand-green); border-color: transparent; }
+    #resetBtn { background: #fff; }
+    button:hover:not(:disabled) { filter: brightness(0.96); }
+    button:disabled { cursor: not-allowed; opacity: 0.55; }
+    .print-help { border-top: 1px solid var(--border); padding-top: 10px; }
+    .print-help summary { color: var(--brand-deep-green); cursor: pointer; font-weight: 700; }
+    .print-help p { margin: 8px 0 0; color: var(--muted); font-size: 0.9rem; line-height: 1.45; }
+    .back { display: inline-block; color: var(--brand-deep-green); font-weight: 700; text-decoration: none; }
+    .back:hover { text-decoration: underline; }
+    .driver-link { display: inline-block; color: var(--brand-deep-green); font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
+    .preview-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 12px; }
+    .preview-head h2 { margin: 0; font-size: 1.1rem; }
+    #sizeMeta { color: var(--muted); font-size: 0.9rem; text-align: right; }
+    .paper-wrap { max-height: 78vh; overflow: auto; padding: 12px; background: #e7ece9; border-radius: 8px; }
+    .poster {
+      --poster-bg: #ffffff;
+      --poster-accent: #009d4f;
+      --poster-text: #12332f;
+      width: min(100%, 760px);
+      aspect-ratio: var(--poster-ratio, 0.914);
+      margin: 0 auto;
+      padding: 8%;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: 5%;
+      overflow: hidden;
+      color: var(--poster-text);
+      background: var(--poster-bg);
+      box-shadow: 0 4px 18px rgba(18, 51, 47, 0.2);
+      container-type: inline-size;
+    }
+    .poster-header { min-width: 0; }
+    .poster-kicker {
+      display: inline-block;
+      max-width: 100%;
+      padding: 0.35em 0.7em;
+      overflow-wrap: anywhere;
+      color: #fff;
+      background: var(--poster-accent);
+      font-size: clamp(0.8rem, 3.2cqw, 1.25rem);
+      font-weight: 750;
+      text-transform: uppercase;
+    }
+    .poster-title {
+      margin: 0.55em 0 0;
+      font-family: var(--poster-font, "Segoe UI", sans-serif);
+      font-size: clamp(1.8rem, 8cqw, 4.5rem);
+      line-height: 1.02;
+      overflow-wrap: anywhere;
+    }
+    .poster-subtitle {
+      margin: 0.55em 0 0;
+      font-family: var(--poster-font, "Segoe UI", sans-serif);
+      font-size: clamp(1rem, 4cqw, 2.1rem);
+      line-height: 1.2;
+      overflow-wrap: anywhere;
+    }
+    .poster-copy {
+      align-self: center;
+      margin: 0;
+      font-family: var(--poster-font, "Segoe UI", sans-serif);
+      font-size: clamp(0.95rem, 3.2cqw, 1.7rem);
+      line-height: 1.42;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+    .poster-footer {
+      min-width: 0;
+      padding-top: 3%;
+      border-top: 0.5cqw solid var(--poster-accent);
+      font-size: clamp(0.8rem, 2.8cqw, 1.4rem);
+      font-weight: 650;
+      overflow-wrap: anywhere;
+    }
+    .poster-image { display: none; width: 100%; height: 100%; object-fit: var(--image-fit, contain); }
+    .poster-image[hidden] { display: none !important; }
+    .poster[data-mode="image"] { display: block; position: relative; padding: 0; }
+    .poster[data-mode="image"] > :not(.poster-image) { display: none !important; }
+    .poster[data-mode="image"] .poster-image { display: block; }
+    .image-meta { min-height: 1.4em; }
+    .image-meta.warning { color: #8a4c00; }
+    #removeImageBtn { background: #fff; }
+    .poster[data-align="center"] { text-align: center; }
+    .poster[data-align="right"] { text-align: right; }
+    .status-error { color: #9c2525; }
+    @media (max-width: 920px) {
+      body { padding: 14px; }
+      .layout { grid-template-columns: 1fr; }
+      .paper-wrap { max-height: 70vh; }
+    }
+    @media (max-width: 520px) {
+      body { padding: 10px; }
+      .panel, .preview { padding: 12px; }
+      .preview-head { align-items: flex-start; flex-direction: column; }
+      #sizeMeta { text-align: left; }
+    }
+    @media print {
+      @page { margin: 0; }
+      html, body { width: 100%; height: auto; margin: 0; padding: 0; background: #fff; }
+      body { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+      .wrap { width: auto; max-width: none; margin: 0; }
+      .wrap > h1, .intro, .panel, .preview-head { display: none !important; }
+      .layout, .preview, .paper-wrap { display: block; width: auto; max-height: none; margin: 0; padding: 0; overflow: visible; border: 0; background: #fff; box-shadow: none; }
+      .poster {
+        width: var(--print-width) !important;
+        height: var(--print-height) !important;
+        min-height: var(--print-height) !important;
+        aspect-ratio: auto;
+        margin: 0;
+        padding: 8%;
+        box-shadow: none;
+        page-break-after: avoid;
+        break-after: avoid;
+      }
+      .poster-kicker { font-size: var(--print-kicker-size); }
+      .poster-title { font-size: var(--print-title-size); }
+      .poster-subtitle { font-size: var(--print-subtitle-size); }
+      .poster-copy { font-size: var(--print-copy-size); }
+      .poster-footer { font-size: var(--print-footer-size); }
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <h1>Canon imagePROGRAF TX-3100</h1>
+    <p class="intro">Lag en plakat eller skriv ut et Canva-design på Canon storformatrull.</p>
+    <div class="layout">
+      <section class="panel" aria-label="Plakatinnstillinger">
+        <p class="meta">Kontroller at Canon TX-3100-driveren er installert på PC-en før utskrift.</p>
+        <div class="dimensions">
+          <div class="field">
+            <label for="width">Bredde (mm)</label>
+            <input id="width" type="number" min="210" max="914" step="1" value="914" required />
+          </div>
+          <div class="field">
+            <label for="height">Lengde (mm)</label>
+            <input id="height" type="number" min="915" max="1500" step="1" value="1000" required />
+          </div>
+        </div>
+        <p class="hint">Canon TX-3100: rullbredde opptil 914 mm. Lengde 915–1500 mm.</p>
+
+        <fieldset class="mode-switch">
+          <legend>Innhold</legend>
+          <div class="mode-options">
+            <label><input type="radio" name="contentMode" value="text" checked /> Lag plakat</label>
+            <label><input type="radio" name="contentMode" value="image" /> Canva-bilde</label>
+          </div>
+        </fieldset>
+
+        <div class="image-controls" id="imageControls" hidden>
+          <div class="field">
+            <label for="artwork">Velg designbilde</label>
+            <input id="artwork" type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" />
+            <p class="hint">Eksporter designet fra Canva som PNG, JPG, WebP eller SVG.</p>
+          </div>
+          <div class="field">
+            <label for="imageFit">Tilpasning til arket</label>
+            <select id="imageFit">
+              <option value="contain">Vis hele bildet</option>
+              <option value="cover">Fyll arket (beskjær kantene)</option>
+            </select>
+          </div>
+          <button id="removeImageBtn" type="button" disabled>Fjern bilde</button>
+          <p class="meta image-meta" id="imageMeta" aria-live="polite">Ingen bilde valgt.</p>
+        </div>
+
+        <div class="text-controls" id="textControls">
+        <div class="field">
+          <label for="kicker">Bannertekst</label>
+          <input id="kicker" type="text" value="INFORMASJON" maxlength="80" />
+        </div>
+        <div class="field">
+          <label for="title">Overskrift</label>
+          <input id="title" type="text" value="Skriv inn overskrift" maxlength="160" />
+        </div>
+        <div class="field">
+          <label for="subtitle">Undertittel</label>
+          <input id="subtitle" type="text" value="En kort forklaring eller viktig beskjed" maxlength="240" />
+        </div>
+        <div class="field">
+          <label for="copy">Hovedtekst</label>
+          <textarea id="copy" maxlength="3000">Skriv inn teksten som skal stå på plakaten. Linjeskift beholdes i utskriften.</textarea>
+        </div>
+        <div class="field">
+          <label for="footer">Kontakt eller avslutning</label>
+          <input id="footer" type="text" value="" maxlength="240" />
+        </div>
+        <div class="dimensions">
+          <div class="field">
+            <label for="align">Tekstjustering</label>
+            <select id="align">
+              <option value="left">Venstre</option>
+              <option value="center">Senter</option>
+              <option value="right">Høyre</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="font">Skrifttype</label>
+            <select id="font">
+              <option value="'Segoe UI', sans-serif">Segoe UI</option>
+              <option value="Arial, sans-serif">Arial</option>
+              <option value="Georgia, serif">Georgia</option>
+              <option value="'Trebuchet MS', sans-serif">Trebuchet MS</option>
+            </select>
+          </div>
+        </div>
+        <div class="colors">
+          <div class="field">
+            <label for="background">Bakgrunn</label>
+            <input id="background" type="color" value="#ffffff" />
+          </div>
+          <div class="field">
+            <label for="accent">Aksentfarge</label>
+            <input id="accent" type="color" value="#009d4f" />
+          </div>
+          <div class="field">
+            <label for="textColor">Tekstfarge</label>
+            <input id="textColor" type="color" value="#12332f" />
+          </div>
+        </div>
+        </div>
+        <p class="meta" id="status" aria-live="polite"></p>
+        <div class="actions">
+          <button id="printBtn" type="button">Skriv ut / Lagre PDF</button>
+          <button id="resetBtn" type="button">Tilbakestill</button>
+        </div>
+        <details class="print-help">
+          <summary>Innstillinger for Canon TX-3100</summary>
+          <p>I nettleserens utskriftsdialog, åpne «Flere innstillinger» og slå av «Topptekst og bunntekst». Da tas ikke dato, sidetittel, nettsideadresse eller sidetall med på utskriften.</p>
+          <p>Velg Canon TX-3100 i utskriftsdialogen. Velg rull/papirkilde, utskriftskvalitet og egendefinert dokumentstørrelse som samsvarer med målene over. Kontroller sidestørrelsen i forhåndsvisningen før utskrift.</p>
+        </details>
+        <a class="back" href="../index.html">Tilbake til skrivervalg</a>
+      </section>
+      <section class="preview" aria-label="Forhåndsvisning av plakat">
+        <div class="preview-head">
+          <h2>Forhåndsvisning</h2>
+          <span id="sizeMeta"></span>
+        </div>
+        <div class="paper-wrap">
+          <article class="poster" id="poster" data-align="left">
+            <img class="poster-image" id="posterImage" alt="Forhåndsvisning av opplastet design" />
+            <header class="poster-header">
+              <span class="poster-kicker" id="posterKicker"></span>
+              <h2 class="poster-title" id="posterTitle"></h2>
+              <p class="poster-subtitle" id="posterSubtitle"></p>
+            </header>
+            <p class="poster-copy" id="posterCopy"></p>
+            <footer class="poster-footer" id="posterFooter"></footer>
+          </article>
+        </div>
+      </section>
+    </div>
+  </main>
+  <script>
+    const formFields = ["width", "height", "kicker", "title", "subtitle", "copy", "footer", "align", "font", "background", "accent", "textColor", "imageFit"];
+    const field = Object.fromEntries(formFields.map((id) => [id, document.getElementById(id)]));
+    const poster = document.getElementById("poster");
+    const printPageStyle = document.getElementById("printPageStyle");
+    const status = document.getElementById("status");
+    const printButton = document.getElementById("printBtn");
+    const imageInput = document.getElementById("artwork");
+    const posterImage = document.getElementById("posterImage");
+    const imageMeta = document.getElementById("imageMeta");
+    const removeImageButton = document.getElementById("removeImageBtn");
+    let artworkUrl = null;
+    let artworkDimensions = null;
+
+    function selectedMode() {
+      return document.querySelector('input[name="contentMode"]:checked').value;
+    }
+
+    function updateImageMeta(width, height) {
+      const fitScale = field.imageFit.value === "cover"
+        ? Math.max(width / artworkDimensions.width, height / artworkDimensions.height)
+        : Math.min(width / artworkDimensions.width, height / artworkDimensions.height);
+      const dpi = Math.round(25.4 / fitScale);
+      imageMeta.textContent = `${imageInput.files[0]?.name || "Designbilde"} · ${artworkDimensions.width} × ${artworkDimensions.height} piksler · ca. ${dpi} DPI i valgt format`;
+      imageMeta.classList.toggle("warning", dpi < 120);
+      if (dpi < 120) imageMeta.textContent += ". Lav oppløsning kan gi et mindre skarpt trykk.";
+    }
+
+    function renderPoster() {
+      const width = Number(field.width.value);
+      const height = Number(field.height.value);
+      const mode = selectedMode();
+      const hasArtwork = Boolean(artworkUrl && artworkDimensions);
+      const validSize = Number.isInteger(width) && width >= 210 && width <= 914
+        && Number.isInteger(height) && height >= 915 && height <= 1500;
+      document.getElementById("textControls").hidden = mode !== "text";
+      document.getElementById("imageControls").hidden = mode !== "image";
+      poster.dataset.mode = mode;
+      poster.style.setProperty("--image-fit", field.imageFit.value);
+      posterImage.hidden = mode !== "image" || !hasArtwork;
+      removeImageButton.disabled = !hasArtwork;
+      printButton.disabled = !validSize || (mode === "image" && !hasArtwork);
+      field.width.setCustomValidity(width >= 210 && width <= 914 ? "" : "Bredden må være mellom 210 og 914 mm.");
+      field.height.setCustomValidity(height >= 915 && height <= 1500 ? "" : "Lengden må være mellom 915 og 1500 mm.");
+
+      if (!validSize) {
+        status.classList.add("status-error");
+        status.textContent = "Kontroller målene: bredde 210–914 mm og lengde 915–1500 mm.";
+        return;
+      }
+
+      status.classList.remove("status-error");
+      status.textContent = mode === "image" && !hasArtwork
+        ? "Velg et designbilde før du skriver ut."
+        : `Utskriftsformat: ${width} × ${height} mm`;
+      document.getElementById("sizeMeta").textContent = `${width} × ${height} mm`;
+      poster.style.setProperty("--poster-ratio", `${width} / ${height}`);
+      poster.style.setProperty("--poster-bg", field.background.value);
+      poster.style.setProperty("--poster-accent", field.accent.value);
+      poster.style.setProperty("--poster-text", field.textColor.value);
+      poster.style.setProperty("--poster-font", field.font.value);
+      poster.style.setProperty("--print-width", `${width}mm`);
+      poster.style.setProperty("--print-height", `${height}mm`);
+      poster.style.setProperty("--print-kicker-size", `${width * 0.025}mm`);
+      poster.style.setProperty("--print-title-size", `${width * 0.072}mm`);
+      poster.style.setProperty("--print-subtitle-size", `${width * 0.038}mm`);
+      poster.style.setProperty("--print-copy-size", `${width * 0.032}mm`);
+      poster.style.setProperty("--print-footer-size", `${width * 0.026}mm`);
+      poster.dataset.align = field.align.value;
+      document.getElementById("posterKicker").textContent = field.kicker.value.trim();
+      document.getElementById("posterTitle").textContent = field.title.value.trim();
+      document.getElementById("posterSubtitle").textContent = field.subtitle.value.trim();
+      document.getElementById("posterCopy").textContent = field.copy.value.trim();
+      document.getElementById("posterFooter").textContent = field.footer.value.trim();
+      document.querySelector(".poster-kicker").hidden = !field.kicker.value.trim();
+      document.querySelector(".poster-subtitle").hidden = !field.subtitle.value.trim();
+      document.querySelector(".poster-copy").hidden = !field.copy.value.trim();
+      document.querySelector(".poster-footer").hidden = !field.footer.value.trim();
+      if (hasArtwork) updateImageMeta(width, height);
+      printPageStyle.textContent = `@media print { @page { size: ${width}mm ${height}mm; margin: 0; } }`;
+    }
+
+    formFields.forEach((id) => {
+      field[id].addEventListener("input", renderPoster);
+      field[id].addEventListener("change", renderPoster);
+    });
+    document.querySelectorAll('input[name="contentMode"]').forEach((input) => input.addEventListener("change", renderPoster));
+    imageInput.addEventListener("change", () => {
+      const file = imageInput.files[0];
+      if (!file) return;
+      const nextUrl = URL.createObjectURL(file);
+      const image = new Image();
+      image.onload = () => {
+        if (artworkUrl) URL.revokeObjectURL(artworkUrl);
+        artworkUrl = nextUrl;
+        artworkDimensions = { width: image.naturalWidth, height: image.naturalHeight };
+        posterImage.src = nextUrl;
+        renderPoster();
+      };
+      image.onerror = () => {
+        URL.revokeObjectURL(nextUrl);
+        imageMeta.textContent = "Bildet kunne ikke åpnes. Velg en PNG-, JPG-, WebP- eller SVG-fil.";
+        imageMeta.classList.add("warning");
+      };
+      image.src = nextUrl;
+    });
+    removeImageButton.addEventListener("click", () => {
+      if (artworkUrl) URL.revokeObjectURL(artworkUrl);
+      artworkUrl = null;
+      artworkDimensions = null;
+      imageInput.value = "";
+      posterImage.removeAttribute("src");
+      imageMeta.textContent = "Ingen bilde valgt.";
+      imageMeta.classList.remove("warning");
+      renderPoster();
+    });
+    printButton.addEventListener("click", () => {
+      if (!printButton.disabled) window.print();
+    });
+    document.getElementById("resetBtn").addEventListener("click", () => {
+      document.querySelector(".panel").querySelectorAll("input, textarea, select").forEach((input) => {
+        if (input instanceof HTMLSelectElement) input.selectedIndex = 0;
+        else if (input instanceof HTMLInputElement && input.type === "radio") input.checked = input.defaultChecked;
+        else input.value = input.defaultValue;
+      });
+      if (artworkUrl) URL.revokeObjectURL(artworkUrl);
+      artworkUrl = null;
+      artworkDimensions = null;
+      posterImage.removeAttribute("src");
+      imageMeta.textContent = "Ingen bilde valgt.";
+      imageMeta.classList.remove("warning");
+      renderPoster();
+    });
+    window.addEventListener("beforeprint", renderPoster);
+    renderPoster();
+  </script>
+</body>
+</html>

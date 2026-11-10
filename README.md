@@ -20,6 +20,7 @@ source/
     plakat/index.html       Plakatgenerator
     storformat/index.html   Skrivermeny for storformatutskrift
       hp-designjet-t520/index.html  Plakatgenerator for HP DesignJet T520
+      canon-tx-3100/index.html     Bildeutskrift for Canon imagePROGRAF TX-3100
     infoskjerm/index.html   Infoskjerm-planlegger
     video/index.html        Videomanus-kort
     fotoark/index.html      Fotoark for utskrift av flere bilder per side
