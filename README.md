@@ -18,6 +18,8 @@ source/
       qr-plus/index.html    QR-kode generator (utvidet)
     innhold/index.html      Undermeny: plakat, infoskjerm, video og fotoark
     plakat/index.html       Plakatgenerator
+    storformat/index.html   Skrivermeny for storformatutskrift
+      hp-designjet-t520/index.html  Plakatgenerator for HP DesignJet T520
     infoskjerm/index.html   Infoskjerm-planlegger
     video/index.html        Videomanus-kort
     fotoark/index.html      Fotoark for utskrift av flere bilder per side
@@ -34,6 +36,7 @@ source/
 | QR-kode generator (enkel) | Generer QR-koder med farge og logo, last ned som PNG/JPG/SVG. |
 | QR-kode generator (utvidet) | Som over, pluss feilkorrigeringsnivå, størrelse, margin og auto-generering. |
 | Plakatgenerator | Lag plakater med tittel, tekst og kontaktfelt i flere formater, last ned som PNG. |
+| Storformat printing | Velg skriver, lag plakater i tilpasset størrelse og skriv ut eller lagre som PDF. |
 | Infoskjerm-planlegger | Bygg en spilleliste med slides og forhåndsvis den som en automatisk loop. |
 | Videomanus-kort | Scene-for-scene manus med varighet, eksporter til tekstfil. |
 | Fargepalett-verktøy | Lag nyanser og beslektede farger fra en basisfarge, sjekk WCAG-kontrast mellom to farger. |
